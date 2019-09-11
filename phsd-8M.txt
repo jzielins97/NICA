@@ -1,0 +1,6 @@
+/home/jakub/work/mpd/11.GeV.UrQMD/TestEvUrqmd.1/mpddst.root
+/home/jakub/work/mpd/11.GeV.UrQMD/TestEvUrqmd.2/mpddst.root
+/home/jakub/work/mpd/11.GeV.UrQMD/TestEvUrqmd.3/mpddst.root
+/home/jakub/work/mpd/11.GeV.UrQMD/TestEvUrqmd.4/mpddst.root
+/home/jakub/work/mpd/11.GeV.UrQMD/TestEvUrqmd.5/mpddst.root
+/home/jakub/work/mpd/11.GeV.UrQMD/TestEvUrqmd.6/mpddst.root
