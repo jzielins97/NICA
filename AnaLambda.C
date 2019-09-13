@@ -187,7 +187,7 @@ std::vector<tuple<float,float,float> > *vvvLpt = &vLambPtEtaY;
 
 //__________________________________________________________________________
 //void AnalOm(Int_t n1 = 0, Int_t n2 = 0, Int_t firstFile = 1, Int_t iset = 1)
-void AnalOm(Int_t n1 = 0, Int_t n2 = 0, Int_t skipFiles = 0, Int_t iset = 1)
+void AnaLam(Int_t n1 = 0, Int_t n2 = 0, Int_t skipFiles = 0, Int_t iset = 1)
 {
   // Analyze TPC (ITS) reco data - reconstruct hyperons 
   // (with track refit to account for dE/dx and MS for heavy particles)
@@ -201,7 +201,7 @@ void AnalOm(Int_t n1 = 0, Int_t n2 = 0, Int_t skipFiles = 0, Int_t iset = 1)
   gROOT->ProcessLine(".x ~/work/analysis/lambdas/lambda_new/Chain1.C(1,\"./mc_0.root\")");
   TChain *simMC = (TChain*) gROOT->FindObject("cbmsim");
   simMC->SetName("cbmsim1");
-  TString fileName = "./phsd-8M.txt";
+  TString fileName = "./urqmd34-11gev.list.txt";
   const Int_t nFiles = 5000;
   //Chain(nFiles,fileName);
   ChainFile(nFiles, fileName, skipFiles);

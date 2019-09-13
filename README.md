@@ -3,13 +3,13 @@ Repository for macros written for mpdroot proton-lambda analysis
 
 ###  AnalProtonPi.C
   Macro for creating basic histograms (pt, dedx vs pt, M vs pt, eta, etc) for proton and pi+ recognition in mpd.
-  Macro uses a txt file with list of mpddst.root files as input (it should have absolute path to the mpddst.root file).
+  Macro uses a txt (example: "urqmd34-11gev.list.txt") file with list of mpddst.root files as input (it should have absolute path to the mpddst.root file).
 
   To run: start root with "root" command. Start macro with ".x AnalProtonPi.C". or with ".x AnalProtonPi(...)" if you want different parameters.
 
 ###  AnaLambda.C
   Macro for creating tree with reconstructed lambdas and primary protons. Macro allows for creating correlation function using CF1D.C macro.
- 
+  Macro uses a txt file (example: "phsd-8M.txt") with list of mpddst.root files as input (it should have absolute path to the mpddst.root file).
   You have to change path to Chain1.C in AnaLambda.C to the path on your computer.
   
   To run: start root with "root" command. Load macro with ".L AnalLambda.C++", it will build library necessary for the macro. Then start function with "AnalOm(0, 100)". First parameter should be 0 and second is a number of events to be considered.
