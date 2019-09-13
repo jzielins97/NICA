@@ -119,7 +119,7 @@ void fcn(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par, Int_t iflag);
 void ApplyPid(MpdPid *pid, vector<Int_t> &vecP, vector<Int_t> &vecPi);
 TChain* Chain(Int_t nFiles, TString firstFile);
 TChain* ChainFile(Int_t nFiles, TString fileNameList, Int_t skipLines);
-void GetProtons(Int_t nEv, MpdTrack *mpdTr, FairMCTrack *mctrack);
+void GetProtons(Int_t nEv, MpdTrack *mpdTr, MpdVertex *vtx, FairMCTrack *mctrack);
 
 Float_t massh, pth, ph, etah, yh, chi2h, disth, path, c2pv, d2pv, masshL, chi2hL, disthL, pathL, angL;
 Float_t etas[2], ps[2], pts[2], chi2s[2], dcas[2], probs[2], chi2sL[2], dcasL[2], angle, masshL1, chi2hL1, b0;
@@ -158,13 +158,13 @@ public:
 struct PP {
 public:
   PP() {}
-  PP(Float_t imassh, Float_t ipth, Float_t iph, Float_t ietah, Float_t ichi2h, Float_t iangle, 
+  PP(Float_t imassh, Float_t ipth, Float_t iph, Float_t idedx, Float_t ietah, Float_t ichi2h, Float_t iphi, Float_t itheta, 
      Float_t idca, 
      Int_t ipdg, Int_t ievNo) : 
-    massh(imassh), pth(ipth), ph(iph), etah(ietah), chi2h(ichi2h),
-    angle(iangle), dca(idca), pdg(ipdg), evNo(ievNo) {
+    massh(imassh), pth(ipth), ph(iph), dedx(idedx), etah(ietah), chi2h(ichi2h), theta(itheta),
+    phi(iphi), dca(idca), pdg(ipdg), evNo(ievNo) {
   }
-  Float_t massh, pth, ph, etah, chi2h, angle;
+  Float_t massh, pth, ph, dedx, etah, chi2h, phi, theta;
   Float_t dca;
   Int_t pdg, evNo;
 };
@@ -284,6 +284,14 @@ void AnalOm(Int_t n1 = 0, Int_t n2 = 0, Int_t skipFiles = 0, Int_t iset = 1)
   TH2D *hProbTruePi = new TH2D("hProbTruePi","Probability for true Pions",50,0,1.1,50,0,1.1);
   TH2D *hProbTrueK = new TH2D("hProbTrueK","Probability for true Kaons",50,0,1.1,50,0,1.1);
   new TH1D("hPIDflag","PID flags",12,0,12);
+
+  //histograms for PID combined
+  /*new TH2D("hSigTPC","TPC signal vs #it{p} for p; #it{p} (GeV/#it{c});dE/dx",200,0.0,2.0,500,5e2,2e4);
+  new TH2D("hSigTOF","TPC signal vs #it{p} for p; #it{p} (GeV/#it{c});dE/dx",200,0.0,2.0,500,5e2,2e4);
+  new TH2D("hSigCOM","TPC signal vs #it{p} for p; #it{p} (GeV/#it{c});dE/dx",200,0.0,2.0,500,5e2,2e4);
+  new TH1D("hpTTPC", "p_{T} distribution (TPC only);#it{p_{T}} (GeV/#it{c});dN/d#{p_{T}}", 100, 0.0, 2.0);
+  new TH1D("hpTTOF", "p_{T} distribution (TOF only);#it{p_{T}} (GeV/#it{c});dN/d#{p_{T}}", 100, 0.0, 2.0);
+  new TH1D("hpTCOM", "p_{T} distribution ;#it{p_{T}} (GeV/#it{c});dN/d#{p_{T}}", 100, 0.0, 2.0);*/
   
   Double_t pmom, eta1, dpp, rorig, ptt;
   Int_t prim, idtr, np, moth, pdg;
@@ -515,25 +523,39 @@ void AnalOm(Int_t n1 = 0, Int_t n2 = 0, Int_t skipFiles = 0, Int_t iset = 1)
     // Loop over DST tracks
     for (Int_t j = 0; j < nMpdTr; ++j) {
       MpdTrack *mpdTr = (MpdTrack*) mpdTracks->UncheckedAt(j);
-
       FairMCTrack* mctrack = (FairMCTrack*) mcTracks->UncheckedAt(j);
-      GetProtons(j+1, mpdTr, mctrack);
+      GetProtons(i+1, mpdTr, mpdVert, mctrack);
+      Float_t tmpMomentum = TMath::Hypot(mpdTr->GetPz(),mpdTr->GetPt());
       
       Int_t id = mpdTr->GetID();
       if (id > idMax || track[id] == 0x0) continue;
       if (ids[id] == 1) {
-	kProb[id] = mpdTr->GetPidProbKaon();
-	piProb[id] = mpdTr->GetPidProbPion();
-	pProb[id] = mpdTr->GetPidProbProton();
-	eProb[id] = mpdTr->GetPidProbElectron();
-	id2dst[id] = j;
-      } else {
-	if (TMath::Abs(mpdTr->GetFirstPointZ()-track[id]->GetParam(1)) < dZ[id]) {
-	  dZ[id] = TMath::Abs(mpdTr->GetFirstPointZ()-track[id]->GetParam(1));
+	if(tmpMomentum > 0.7){
 	  kProb[id] = mpdTr->GetPidProbKaon();
 	  piProb[id] = mpdTr->GetPidProbPion();
 	  pProb[id] = mpdTr->GetPidProbProton();
 	  eProb[id] = mpdTr->GetPidProbElectron();
+	}else{
+	  kProb[id] = mpdTr->GetTPCPidProbKaon();
+	  piProb[id] = mpdTr->GetTPCPidProbPion();
+	  pProb[id] = mpdTr->GetTPCPidProbProton();
+	  eProb[id] = mpdTr->GetTPCPidProbElectron();
+	}
+	id2dst[id] = j;
+      } else {
+	if (TMath::Abs(mpdTr->GetFirstPointZ()-track[id]->GetParam(1)) < dZ[id]) {
+	  dZ[id] = TMath::Abs(mpdTr->GetFirstPointZ()-track[id]->GetParam(1));
+	  if(tmpMomentum > 0.7){
+	    kProb[id] = mpdTr->GetPidProbKaon();
+	    piProb[id] = mpdTr->GetPidProbPion();
+	    pProb[id] = mpdTr->GetPidProbProton();
+	    eProb[id] = mpdTr->GetPidProbElectron();
+	  }else{
+	    kProb[id] = mpdTr->GetTPCPidProbKaon();
+	    piProb[id] = mpdTr->GetTPCPidProbPion();
+	    pProb[id] = mpdTr->GetTPCPidProbProton();
+	    eProb[id] = mpdTr->GetTPCPidProbElectron();
+	  }
 	  id2dst[id] = j;
 	}
       }
@@ -1320,36 +1342,122 @@ TChain* ChainFile(Int_t nFiles, TString fileNameList, Int_t skipLines)
 
 //____________________________________________________________________________
 
-void GetProtons(Int_t nEv, MpdTrack *mpdTr, FairMCTrack *mctrack){
-  Float_t pidproton = mpdTr->GetPidProbProton();
-  Float_t pidpion = mpdTr->GetPidProbPion();
-  Float_t pidkaon = mpdTr->GetPidProbKaon();
+void GetProtons(Int_t nEv, MpdTrack *mpdTr, MpdVertex *vtx, FairMCTrack *mctrack){
+  Float_t pidproton, pidpion, pidkaon;
+  Float_t p = TMath::Hypot(mpdTr->GetPz(),mpdTr->GetPt());
+
+  if(p>0.75){  
+    pidproton = mpdTr->GetPidProbProton();
+    pidpion = mpdTr->GetPidProbPion();
+    pidkaon = mpdTr->GetPidProbKaon();
+  }else{
+    pidproton = mpdTr->GetTPCPidProbProton();
+    pidpion = mpdTr->GetTPCPidProbPion();
+    pidkaon = mpdTr->GetTPCPidProbKaon();
+  }
   Float_t pMass = mpdTr->GetTofMass2();
   Float_t prob = 0.3;
-      
+
+  /*TH2D *hSigTPC = (TH2D*) gROOT->FindObjectAny("hSigTPC");
+  TH2D *hSigTOF = (TH2D*) gROOT->FindObjectAny("hSigTOF");
+  TH2D *hSigCOM = (TH2D*) gROOT->FindObjectAny("hSigCOM");
+  TH1D *hpTTPC = (TH1D*) gROOT->FindObjectAny("hpTTPC");
+  TH1D *hpTTOF = (TH1D*) gROOT->FindObjectAny("hpTTOF");
+  TH1D *hpTCOM = (TH1D*) gROOT->FindObjectAny("hpTCOM");*/
+  
   if ( pidproton > prob && pidproton > pidpion && pidproton > pidkaon && pMass>0.5 && pMass<1.4) {
     if(mpdTr->GetCharge() == 1){  //taking only protons
       if(mpdTr->GetNofHits() > 10){ //only tracks with at least 10 points
       
 
-	TVector3 primVert;
+	TVector3 pos, primVert;
 	//((MpdVertex*)vtxs->First())->Position(primVert);
-	primVert = (mpdTr->GetHelix()).origin();
-	if(primVert.Mag() < 5.){ //only protons close to the collision
+	pos = (mpdTr->GetHelix()).origin();
+	vtx->Position(primVert);
+	pos = pos-primVert;
+	//printf("Ev %d: %f\n", nEv, pos.Mag());
+	if(pos.Mag() < 5.){ //only protons close to the collision
+	  Float_t pT = TMath::Abs(mpdTr->GetPt());
+	  Float_t eta = mpdTr->GetEta();
+	  Float_t chi2 = mpdTr->GetChi2();
+	  Float_t phi = mpdTr->GetPhi();
+	  Float_t theta = mpdTr->GetTheta();
+	  Float_t dedx = mpdTr->GetdEdXTPC();
+	  TVector3 vec(mpdTr->GetDCAX(), mpdTr->GetDCAY(), mpdTr->GetDCAZ());
+	  Float_t dca = vec.Mag();
+	  Int_t pdg = mctrack->GetPdgCode();
+	  //printf("\t%f, %d\n", pT, pdg);
+	  PP proton(pMass, pT, p, dedx, eta, chi2, phi, theta, dca, pdg, nEv);
+	  vProtons.push_back(proton);
+	  //hSigCOM->Fill(p, dedx);
+	  //hpTCOM->Fill(pT);
+	}
+      }
+    }
+  }
+  
+  /*pidproton = mpdTr->GetTPCPidProbProton();
+  pidpion = mpdTr->GetTPCPidProbPion();
+  pidkaon = mpdTr->GetTPCPidProbKaon();
+  pMass = mpdTr->GetTofMass2();
+  if ( pidproton > prob && pidproton > pidpion && pidproton > pidkaon && pMass>0.5 && pMass<1.4) {
+    if(mpdTr->GetCharge() == 1){  //taking only protons
+      if(mpdTr->GetNofHits() > 10){ //only tracks with at least 10 points
+      
 
+	TVector3 pos, primVert;
+	//((MpdVertex*)vtxs->First())->Position(primVert);
+	pos = (mpdTr->GetHelix()).origin();
+	vtx->Position(primVert);
+	pos = pos-primVert;
+	if(pos.Mag() < 5.){ //only protons close to the collision
 	  Float_t pT = mpdTr->GetPt();
 	  Float_t p = TMath::Hypot(mpdTr->GetPz(),mpdTr->GetPt());
 	  Float_t eta = mpdTr->GetEta();
 	  Float_t chi2 = mpdTr->GetChi2();
-	  Float_t angle = mpdTr->GetPhi();
+	  Float_t phi = mpdTr->GetPhi();
+	  Float_t theta = mpdTr->GetTheta();
+	  Float_t dedx = mpdTr->GetdEdXTPC();
 	  TVector3 vec(mpdTr->GetDCAX(), mpdTr->GetDCAY(), mpdTr->GetDCAZ());
 	  Float_t dca = vec.Mag();
 	  Int_t pdg = mctrack->GetPdgCode();
-    
-	  PP proton(pMass, pT, p, eta, chi2, angle, dca, pdg, nEv);
-	  vProtons.push_back(proton);
+	  hSigTPC->Fill(p, dedx);
+	  hpTTPC->Fill(pT);
 	}
       }
-    }	    
+    }
   }
+
+  pidproton = mpdTr->GetTOFPidProbProton();
+  pidpion = mpdTr->GetTOFPidProbPion();
+  pidkaon = mpdTr->GetTOFPidProbKaon();
+  pMass = mpdTr->GetTofMass2();
+  if ( pidproton > prob && pidproton > pidpion && pidproton > pidkaon && pMass>0.5 && pMass<1.4) {
+    if(mpdTr->GetCharge() == 1){  //taking only protons
+      if(mpdTr->GetNofHits() > 10){ //only tracks with at least 10 points
+      
+
+	TVector3 pos, primVert;
+	//((MpdVertex*)vtxs->First())->Position(primVert);
+	pos = (mpdTr->GetHelix()).origin();
+	vtx->Position(primVert);
+	pos = pos-primVert;
+	if(pos.Mag() < 5.){ //only protons close to the collision
+	  Float_t pT = mpdTr->GetPt();
+	  Float_t p = TMath::Hypot(mpdTr->GetPz(),mpdTr->GetPt());
+	  Float_t eta = mpdTr->GetEta();
+	  Float_t chi2 = mpdTr->GetChi2();
+	  Float_t phi = mpdTr->GetPhi();
+	  Float_t theta = mpdTr->GetTheta();
+	  Float_t dedx = mpdTr->GetdEdXTPC();
+	  TVector3 vec(mpdTr->GetDCAX(), mpdTr->GetDCAY(), mpdTr->GetDCAZ());
+	  Float_t dca = vec.Mag();
+	  Int_t pdg = mctrack->GetPdgCode();
+	  hSigTOF->Fill(p, dedx);
+	  hpTTOF->Fill(pT);
+	}
+      }
+    }
+    }*/
+  
 }
