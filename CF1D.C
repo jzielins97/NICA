@@ -39,11 +39,11 @@ using namespace std;
 struct L0 {
 public:
   L0() {}
-  L0(Float_t imassh, Float_t ipth, Float_t iph, Float_t ietah, Float_t iyh, Float_t ichi2h, Float_t idisth, 
+  L0(Float_t imassh, Float_t ipth, Float_t iph, Float_t ipxh, Float_t ipyh, Float_t ipzh, Float_t ietah, Float_t iyh, Float_t ichi2h, Float_t idisth, 
      Float_t ipath, Float_t iangle, Float_t *ietas, Float_t *ips, Float_t *ipts, Float_t *ichi2s, Float_t *idcas, 
      Float_t idca, Float_t ic2pv, Float_t iomega1, Float_t iomega2, 
      Int_t *iorigs, Int_t *iqs, Int_t *ilayMx, Int_t ievNo) : 
-    massh(imassh), pth(ipth), ph(iph), etah(ietah), yh(iyh), chi2h(ichi2h), disth(idisth), path(ipath),
+    massh(imassh), pth(ipth), ph(iph), pxh(ipxh),pyh(ipyh),pzh(ipzh), etah(ietah), yh(iyh), chi2h(ichi2h), disth(idisth), path(ipath),
     angle(iangle), dca(idca), c2pv(ic2pv), omega1(iomega1), omega2(iomega2), evNo(ievNo) {
     for (Int_t j = 0; j < 2; ++j) {
       etas[j] = ietas[j];
@@ -56,7 +56,7 @@ public:
       layMx[j] = ilayMx[j];
     }
   }
-  Float_t massh, pth, ph, etah, yh, chi2h, disth, path, angle, etas[2], ps[2], pts[2], chi2s[2], dcas[2];
+  Float_t massh, pth, ph, pxh, pyh, pzh, etah, yh, chi2h, disth, path, angle, etas[2], ps[2], pts[2], chi2s[2], dcas[2];
   Float_t dca, c2pv, omega1, omega2;
   Int_t origs[2], qs[2], layMx[2], evNo;
 };
@@ -64,37 +64,23 @@ public:
 struct PP {
 public:
   PP() {}
-  PP(Float_t imassh, Float_t ipth, Float_t iph, Float_t ietah, Float_t ichi2h, Float_t iangle,
+  PP(Float_t imassh, Float_t ipth, Float_t iph, Float_t ipxh, Float_t ipyh, Float_t ipzh, Float_t idedx, Float_t ietah, Float_t ichi2h, Float_t iphi, Float_t itheta, 
      Float_t idca, 
      Int_t ipdg, Int_t ievNo) : 
-    massh(imassh), pth(ipth), ph(iph), etah(ietah), chi2h(ichi2h),
-    angle(iangle), dca(idca), pdg(ipdg), evNo(ievNo) {
+    massh(imassh), pth(ipth), ph(iph), pxh(ipxh), pyh(ipyh),pzh(ipzh), dedx(idedx), etah(ietah), chi2h(ichi2h), theta(itheta),
+    phi(iphi), dca(idca), pdg(ipdg), evNo(ievNo) {
   }
-  Float_t massh, pth, ph, etah, chi2h, angle;
+  Float_t massh, pth, ph, pxh, pyh, pzh, dedx, etah, chi2h, phi, theta;
   Float_t dca;
   Int_t pdg, evNo;
 };
 
-/*struct PP {
-public:
-  PP() {}
-  PP(Float_t imassh, Float_t ipth, Float_t iph, Float_t idedx, Float_t ietah, Float_t ichi2h, Float_t iphi, Float_t itheta, 
-     Float_t idca, 
-     Int_t ipdg, Int_t ievNo) : 
-    massh(imassh), pth(ipth), ph(iph), dedx(idedx), etah(ietah), chi2h(ichi2h), theta(itheta),
-    phi(iphi), dca(idca), pdg(ipdg), evNo(ievNo) {
-  }
-  Float_t massh, pth, ph, dedx, etah, chi2h, phi, theta;
-  Float_t dca;
-  Int_t pdg, evNo;
-  };
-*/
 
 struct Particle{
 public:
   Particle() {}
-  Particle(Float_t ip, Float_t iPt, Float_t iE, Float_t ieta, Float_t iphi, Int_t ievent, Int_t ipdg) : p(ip), Pt(iPt), E(iE), eta(ieta), phi(iphi), event(ievent), pdg(ipdg) {}
-  Float_t p, Pt, E, eta, phi;
+  Particle(Float_t ip, Float_t iPt, Float_t ipx, Float_t ipy, Float_t ipz, Float_t iE, Float_t ieta, Float_t iphi, Int_t ievent, Int_t ipdg) : p(ip), Pt(iPt), px(ipx), py(ipy), pz(ipz), E(iE), eta(ieta), phi(iphi), event(ievent), pdg(ipdg) {}
+  Float_t p, Pt,px,py,pz, E, eta, phi;
     Int_t event, pdg;
 };
 
@@ -127,16 +113,24 @@ void Cf(){
   const Double_t QMAX = 1.4;
   const int NEVPACK = 10, NBINS = 100, kMax=1000000;
   
-  TString binnames[11] = {"015-025","025-035","035-045","045-055", "055-065","065-075","075-085","085-095", "095-105", "105-115", "115-120"};
-  double pt_low[11] = {0.15, 0.25, 0.35, 0.45, 0.55, 0.65, 0.75, 0.85, 0.95, 1.05, 1.15};
-  double pt_high[11] = {0.25, 0.35, 0.45, 0.55, 0.65, 0.75, 0.85, 0.95, 1.05, 1.15, 1.20};
+  //  TString binnames[11] = {"015-025","025-035","035-045","045-055", "055-065","065-075","075-085","085-095", "095-105", "105-115", "115-120"};
+  //  double pt_low[11] = {0.15, 0.25, 0.35, 0.45, 0.55, 0.65, 0.75, 0.85, 0.95, 1.05, 1.15};
+  //  double pt_high[11] = {0.25, 0.35, 0.45, 0.55, 0.65, 0.75, 0.85, 0.95, 1.05, 1.15, 1.20};
 
+  TString binnames[5] = {"015-045","045-065","065-085","085-105", "105-125"};
+  double pt_low[5] = {0.15, 0.45, 0.65, 0.85, 0.105};
+  double pt_high[5] = {0.45, 0.65, 0.85, 0.105, 0.125};
+
+
+  //TH1D* hEta1 = new TH1D("hEta1", "#eta distribution #Lambda;#eta;dN/d#eta", 100, -1.5,1.5);
+  //TH1D* hEta = new TH1D("hEta2", "#eta distribution p;#eta;dN/d#eta", 100, -1.5,1.5);
+  
   TH1D* hCFnum_PP[NPT];
   TH1D* hCFden_PP[NPT];
   TH1D* hCF_PP[NPT];
 
-  TH2D* h2D_num[NPT];
-  TH2D* h2D_den[NPT];
+  //TH2D* h2D_num[NPT];
+  //TH2D* h2D_den[NPT];
 
   TH1D* hCFnum_LL[NPT];
   TH1D* hCFden_LL[NPT];
@@ -150,8 +144,8 @@ void Cf(){
     hCFnum_PP [ipt] = new TH1D("hCFnum_"+binnames[ipt]+"_PP","hCFnum"+binnames[ipt],NBINS, 0., QMAX);
     hCFden_PP [ipt] = new TH1D("hCFden_"+binnames[ipt]+"_PP","hCFden"+binnames[ipt],NBINS, 0., QMAX);
 
-    h2D_num[ipt] = new TH2D("h2D_num_"+binnames[ipt]+"PP", "hCFnum"+binnames[ipt], NBINS, -4.0, 4.0, NBINS, -1.0, 4.0);
-    h2D_den[ipt] = new TH2D("h2D_den_"+binnames[ipt]+"PP", "hCFnum"+binnames[ipt], NBINS, -4.0, 4.0, NBINS, -1.0, 4.0);
+    //h2D_num[ipt] = new TH2D("h2D_num_"+binnames[ipt]+"PP", "hCFnum"+binnames[ipt], NBINS, -4.0, 4.0, NBINS, -1.0, 4.0);
+    //h2D_den[ipt] = new TH2D("h2D_den_"+binnames[ipt]+"PP", "hCFnum"+binnames[ipt], NBINS, -4.0, 4.0, NBINS, -1.0, 4.0);
 
     hCFnum_LL [ipt] = new TH1D("hCFnum_"+binnames[ipt]+"_LL","hCFnum"+binnames[ipt],NBINS, 0., QMAX);
     hCFden_LL [ipt] = new TH1D("hCFden_"+binnames[ipt]+"_LL","hCFden"+binnames[ipt],NBINS, 0., QMAX);
@@ -162,7 +156,7 @@ void Cf(){
 
   Double_t pP1, pP2, pL1, pL2;
   
-  TFile* ifile = new TFile("./cluster/xi-2.histo.50k.root");
+  TFile* ifile = new TFile("./xi-1.histo.root");
   TFile* ofile = new TFile("output.root", "recreate");
   
   TTree* eventTree = (TTree*) ifile->Get("event");
@@ -196,9 +190,12 @@ void Cf(){
       Int_t l0No=0;
       for(UInt_t ijk=0; ijk<l0Ev->size(); ijk++){
 	L0 L = (*l0Ev)[ijk];
+	//hEta1->Fill(L.etah);
+	if(TMath::Abs(L.etah) > 1.3) continue;
+	
 	Float_t E = TMath::Sqrt(L.ph*L.ph+L.massh*L.massh);
 	if( L.origs[0] > 0){
-	  Particle par(L.ph, L.pth, E, L.etah, L.angle, i+ij, pdgCodeL0);
+	  Particle par(L.ph, L.pth, L.pxh, L.pyh, L.pzh, E, L.etah, L.angle, i+ij, pdgCodeL0);
 	  //Particle par(L.ph, L.pth, E, L.evNo, pdgCodeL0);
 	  part[pcount+l0No] = par;
 	  l0No++;
@@ -209,17 +206,18 @@ void Cf(){
 
       for(UInt_t ijk=0; ijk<PPEv->size(); ijk++){
 	PP P = (*PPEv)[ijk];
-	Float_t pz = TMath::Sqrt(P.ph * P.ph - P.pth * P.pth);
+	//hEta2->Fill(P.etah);
+	if(TMath::Abs(P.etah) > 1.3) continue;
+
 	Float_t E = TMath::Sqrt(P.ph*P.ph+P.massh*P.massh);
 	//cout<<"P: E="<<E<<" p="<<P.ph<<endl;
-	Particle par(P.ph, P.pth, E,P.etah, P.angle, i+ij, pdgCodePr);
+	Particle par(TMath::Abs(P.ph), TMath::Abs(P.pth), P.pxh, P.pyh, P.pzh,E,P.etah, P.phi, i+ij, pdgCodePr);
 	//Particle par(P.ph, P.pth, E, P.evNo, pdgCodePr);
 	part[pcount+ijk] = par;
       }
       L0 L = (*l0Ev)[0];
       PP P = (*PPEv)[0];
       //cout<<"Protons: "<<PPEv->size()<<" Lambdas: "<<l0No<<endl;
-      if(l0No>1) iTemp++;
       pcount+=PPEv->size();
       if(pcount>kMax) cout<<"Too many particles"<<endl;
       
@@ -265,35 +263,36 @@ void Cf(){
 	int i2 = ir[jran];
 	par2 = part[i2];
 	
-	Float_t kt = 0.5 * TMath::Abs(par1.p+par2.p);
-	Double_t pdiff = par2.p - par1.p;
+	Float_t kt = 0.5 * TMath::Abs(par1.Pt+par2.Pt);
+	TVector3 vec1(par1.px,par1.py,par1.pz);	
+	TVector3 vec2(par2.px,par2.py,par2.pz);
+	Double_t pdiff = (vec1-vec2).Mag();
 	Double_t Ediff = par2.E - par1.E;
 	Double_t qinv = TMath::Sqrt( pdiff*pdiff - Ediff*Ediff);
 	if(par1.pdg==pdgCodePr){ //particle 1 is proton
 	  if(par2.pdg==pdgCodePr){
 	    for(int ipt = 0; ipt<NPT; ipt++){
 	      //if(kt>pt_low[ipt] && kt<pt_high[ipt]){
-		//Double_t q =(par1.p-par2.p);
-		//cout<<"PP q="<<q<<endl;
+	      if(kt>0.15 && kt<1.25){
 		if(par1.event == par2.event){
 		  if(qinv>0. && qinv < QMAX)hCFnum_PP[ipt]->Fill(qinv);
-		  h2D_num[ipt]->Fill(par1.eta-par2.eta, par1.phi-par2.phi);
+		  //h2D_num[ipt]->Fill(par1.eta-par2.eta, par1.phi-par2.phi);
 		}else{
 		  if(qinv>0. && qinv < QMAX)hCFden_PP[ipt]->Fill(qinv);
-		  h2D_den[ipt]->Fill(par1.eta-par2.eta, par1.phi-par2.phi);
+		  //h2D_den[ipt]->Fill(par1.eta-par2.eta, par1.phi-par2.phi);
 		}
-		//}
+	      }
 	    }
 	  }else if(par2.pdg==pdgCodeL0){ //particle 1 is proton, particle 2 is lambda
 	    for(int ipt = 0; ipt<NPT; ipt++){
 	      //if(kt>pt_low[ipt] && kt<pt_high[ipt]){
-		//Double_t q =(par1.p-par2.p);
+	      if(kt>0.15 && kt<1.25){
 		if(par1.event == par2.event){
 		  if(qinv>0. && qinv < QMAX)hCFnum_PL[ipt]->Fill(qinv);
 		}else{
 		  if(qinv>0. && qinv < QMAX)hCFden_PL[ipt]->Fill(qinv);
 		}
-		//}
+	      }
 	    }
 	  }
 	}else if(par1.pdg==pdgCodeL0){ //particle 1 is lambda
@@ -302,7 +301,7 @@ void Cf(){
 	    //cout<<" found second lambd"<<i2<<endl;
 	    for(int ipt = 0; ipt<NPT; ipt++){
 	      //if(kt>pt_low[ipt] && kt<pt_high[ipt]){
-		//Double_t q =(par1.p-par2.p);
+	      if(kt>0.15 && kt<1.25){
 		//cout<<"LL: qinv="<<qinv;
 		if(par1.event == par2.event){
 		  if(qinv>0. && qinv < QMAX)hCFnum_LL[ipt]->Fill(qinv);
@@ -313,7 +312,7 @@ void Cf(){
 		  //cout<<" diff"<<endl;
 		  noLdiff++;
 		}
-		//}
+	      }
 	    }
 	  }
 	}
@@ -323,7 +322,7 @@ void Cf(){
     
   
     npart+=pcount;
-    cout<<npart<<" ["<<pcount<<"]"<<" LL: same="<<noLsame<<" diff="<<noLdiff<<endl;
+    cout<<npart<<" ["<<pcount<<"]"<<endl;//<<" LL: same="<<noLsame<<" diff="<<noLdiff<<endl;
   }
   //cout<<npart<<endl;
   //opfile->cd();
@@ -341,8 +340,8 @@ void Cf(){
       hCFnum_PP[ipt]->Write();
       hCFden_PP[ipt]->Write();
 
-      h2D_num[ipt]->Write();
-      h2D_den[ipt]->Write();
+      //h2D_num[ipt]->Write();
+      //h2D_den[ipt]->Write();
 
       hCFnum_LL[ipt]->Write();
       hCFden_LL[ipt]->Write();
@@ -363,8 +362,15 @@ void Cf(){
     }
   
   //ofile->Write();
-  cout<<iTemp<<endl;
+  //cout<<iTemp<<endl;
+  //TCanvas* cEta = new TCanvas("cEta", "Eta",10,10,1000,400);
+  //cEta->Divide(2,1);
+  //cEta->cd(1);
+  //hEta1->Draw();
+  //cEta->cd(2);
+  //hEta2->Draw();
   timer.Stop();
+  
   std::cout << " Time for new Vector " << timer.RealTime() << "  " << timer.CpuTime() << std::endl;
 
 }
@@ -380,7 +386,9 @@ void Corr(void){
   const Double_t QMAX = 1.5;
   const int NEVPACK = 10, NBINS = 100, kMax=1000000;
   
-  TString binnames[11] = {"015-025","025-035","035-045","045-055", "055-065","065-075","075-085","085-095", "095-105", "105-115", "115-120"};
+  //  TString binnames[11] = {"015-025","025-035","035-045","045-055", "055-065","065-075","075-085","085-095", "095-105", "105-115", "115-120"};
+  TString binnames[5] = {"015-045","045-065","065-085","085-105", "105-125"};
+
 
   TFile* ifile = new TFile("output.root");
   TFile* ofile = new TFile("out_corr.root", "recreate");
@@ -395,18 +403,20 @@ void Corr(void){
 	num = dynamic_cast<TH1D*>(ifile->Get("hCFnum_"+binnames[ipt]+"_"+systems[system])->Clone());
 	den = dynamic_cast<TH1D*>(ifile->Get("hCFden_"+binnames[ipt]+"_"+systems[system])->Clone());
 	ofile->cd();
-      
+	
 	double minRange = 0.1; //0.1
 	double maxRange = 0.2; //0.2
 
 	int numBinMin = num->FindBin(minRange);
 	int numBinMax = num->FindBin(maxRange);
 	double sn = (num->Integral(numBinMin,numBinMax, "width"));
-
+	//sn = num->GetEntries();
+	
 	int denBinMin = num->FindBin(minRange);
 	int denBinMax = num->FindBin(maxRange);
 	double sd = (den->Integral(denBinMin,denBinMax, "width"));
-
+	//sd = den->GetEntries();
+	
 	//num->Scale(1.0/sn);
 	//den->Scale(1.0/sd);
 	//cout<<"NUM="<<num->Integral(numBinMin, numBinMax, "width")<<" DEN="<<den->Integral(numBinMin, numBinMax, "width")<<endl;
@@ -454,11 +464,13 @@ void DrawPt(){
 
     for(UInt_t j=0; j<l0->size(); j++){
       L0 par = (*l0)[j];
+      if(TMath::Abs(par.etah) > 1.3) continue;
       if(par.origs[0] > 0) hptL0->Fill(par.pth);
     }
 
     for(UInt_t j=0; j<p->size(); j++){
       PP par = (*p)[j];
+      if(TMath::Abs(par.etah) > 1.3) continue;
       hptP->Fill(TMath::Abs(par.pth));
     }
   }

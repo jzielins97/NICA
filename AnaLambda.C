@@ -133,11 +133,11 @@ vector<vector<Double_t> > vecL1;
 struct L0 {
 public:
   L0() {}
-  L0(Float_t imassh, Float_t ipth, Float_t iph, Float_t ietah, Float_t iyh, Float_t ichi2h, Float_t idisth, 
+  L0(Float_t imassh, Float_t ipth, Float_t iph, Float_t ipxh, Float_t ipyh, Float_t ipzh, Float_t ietah, Float_t iyh, Float_t ichi2h, Float_t idisth, 
      Float_t ipath, Float_t iangle, Float_t *ietas, Float_t *ips, Float_t *ipts, Float_t *ichi2s, Float_t *idcas, 
      Float_t idca, Float_t ic2pv, Float_t iomega1, Float_t iomega2, 
      Int_t *iorigs, Int_t *iqs, Int_t *ilayMx, Int_t ievNo) : 
-    massh(imassh), pth(ipth), ph(iph), etah(ietah), yh(iyh), chi2h(ichi2h), disth(idisth), path(ipath),
+    massh(imassh), pth(ipth), ph(iph), pxh(ipxh),pyh(ipyh),pzh(ipzh), etah(ietah), yh(iyh), chi2h(ichi2h), disth(idisth), path(ipath),
     angle(iangle), dca(idca), c2pv(ic2pv), omega1(iomega1), omega2(iomega2), evNo(ievNo) {
     for (Int_t j = 0; j < 2; ++j) {
       etas[j] = ietas[j];
@@ -150,7 +150,7 @@ public:
       layMx[j] = ilayMx[j];
     }
   }
-  Float_t massh, pth, ph, etah, yh, chi2h, disth, path, angle, etas[2], ps[2], pts[2], chi2s[2], dcas[2];
+  Float_t massh, pth, ph, pxh, pyh, pzh, etah, yh, chi2h, disth, path, angle, etas[2], ps[2], pts[2], chi2s[2], dcas[2];
   Float_t dca, c2pv, omega1, omega2;
   Int_t origs[2], qs[2], layMx[2], evNo;
 };
@@ -158,13 +158,13 @@ public:
 struct PP {
 public:
   PP() {}
-  PP(Float_t imassh, Float_t ipth, Float_t iph, Float_t idedx, Float_t ietah, Float_t ichi2h, Float_t iphi, Float_t itheta, 
+  PP(Float_t imassh, Float_t ipth, Float_t iph, Float_t ipxh, Float_t ipyh, Float_t ipzh, Float_t idedx, Float_t ietah, Float_t ichi2h, Float_t iphi, Float_t itheta, 
      Float_t idca, 
      Int_t ipdg, Int_t ievNo) : 
-    massh(imassh), pth(ipth), ph(iph), dedx(idedx), etah(ietah), chi2h(ichi2h), theta(itheta),
+    massh(imassh), pth(ipth), ph(iph), pxh(ipxh), pyh(ipyh),pzh(ipzh), dedx(idedx), etah(ietah), chi2h(ichi2h), theta(itheta),
     phi(iphi), dca(idca), pdg(ipdg), evNo(ievNo) {
   }
-  Float_t massh, pth, ph, dedx, etah, chi2h, phi, theta;
+  Float_t massh, pth, ph, pxh, pyh, pzh, dedx, etah, chi2h, phi, theta;
   Float_t dca;
   Int_t pdg, evNo;
 };
@@ -198,7 +198,7 @@ void AnaLam(Int_t n1 = 0, Int_t n2 = 0, Int_t skipFiles = 0, Int_t iset = 1)
   // Load basic libraries
   //gROOT->ProcessLine(".x ~/mpd/loadlibs.C");
 
-  gROOT->ProcessLine(".x ~/work/analysis/lambdas/lambda_new/Chain1.C(1,\"./mc_0.root\")");
+  gROOT->ProcessLine(".x /eos/nica/mpd/users/zielinski/work/analysis/lambdas/lambda_new/Chain1.C(1,\"./mc_0.root\")");
   TChain *simMC = (TChain*) gROOT->FindObject("cbmsim");
   simMC->SetName("cbmsim1");
   TString fileName = "./urqmd34-11gev.list.txt";
@@ -1001,6 +1001,9 @@ void BuildLambda(vector<Int_t> &vecP, vector<Int_t> &vecPi, vector<MpdParticle*>
 	angle = v0.Angle(lambPart.Momentum3());
 	pth = lambPart.Pt(); // reconstructed
 	ph = lambPart.Momentum(); // reconstructed
+	Float_t pxh = (lambPart.Momentum3()).Px(); // reconstructed
+	Float_t pyh = (lambPart.Momentum3()).Py(); // reconstructed
+	Float_t pzh = (lambPart.Momentum3()).Pz(); // reconstructed
         if (pth > 0.001) etah = lambPart.Momentum3().Eta(); 
         else etah = TMath::Sign(100.,lambPart.Momentum3().Z()); 
 	pair<Double_t,Double_t> paths = helix.pathLengths(helix1);
@@ -1052,7 +1055,7 @@ void BuildLambda(vector<Int_t> &vecP, vector<Int_t> &vecPi, vector<MpdParticle*>
 	}
 	//((TTree*)gROOT->FindObjectAny("hypers"))->Fill();
 
-	L0 l0(massh, pth, ph, etah, yh, chi2h, disth, path, angle, etas, ps, pts, chi2s, dcas,
+	L0 l0(massh, pth, ph, pxh, pyh, pzh, etah, yh, chi2h, disth, path, angle, etas, ps, pts, chi2s, dcas,
 	      dca, c2pv, omega1, omega2, origs, qs, layMx, evNo);
 	vLambdas.push_back(l0);
       } // if (chi2 >= 0 && chi2 < gC2L...
@@ -1345,6 +1348,10 @@ TChain* ChainFile(Int_t nFiles, TString fileNameList, Int_t skipLines)
 void GetProtons(Int_t nEv, MpdTrack *mpdTr, MpdVertex *vtx, FairMCTrack *mctrack){
   Float_t pidproton, pidpion, pidkaon;
   Float_t p = TMath::Hypot(mpdTr->GetPz(),mpdTr->GetPt());
+  Float_t pMass = mpdTr->GetTofMass2();
+  Float_t eta = mpdTr->GetEta();
+  Float_t prob = 0.3;
+
 
   if(p>0.75){  
     pidproton = mpdTr->GetPidProbProton();
@@ -1355,18 +1362,10 @@ void GetProtons(Int_t nEv, MpdTrack *mpdTr, MpdVertex *vtx, FairMCTrack *mctrack
     pidpion = mpdTr->GetTPCPidProbPion();
     pidkaon = mpdTr->GetTPCPidProbKaon();
   }
-  Float_t pMass = mpdTr->GetTofMass2();
-  Float_t prob = 0.3;
-
-  /*TH2D *hSigTPC = (TH2D*) gROOT->FindObjectAny("hSigTPC");
-  TH2D *hSigTOF = (TH2D*) gROOT->FindObjectAny("hSigTOF");
-  TH2D *hSigCOM = (TH2D*) gROOT->FindObjectAny("hSigCOM");
-  TH1D *hpTTPC = (TH1D*) gROOT->FindObjectAny("hpTTPC");
-  TH1D *hpTTOF = (TH1D*) gROOT->FindObjectAny("hpTTOF");
-  TH1D *hpTCOM = (TH1D*) gROOT->FindObjectAny("hpTCOM");*/
+  
   
   if ( pidproton > prob && pidproton > pidpion && pidproton > pidkaon && pMass>0.5 && pMass<1.4) {
-    if(mpdTr->GetCharge() == 1){  //taking only protons
+    if(mpdTr->GetCharge() == 1 && TMath::Abs(eta) < 1.3){  //taking only protons
       if(mpdTr->GetNofHits() > 10){ //only tracks with at least 10 points
       
 
@@ -1378,7 +1377,9 @@ void GetProtons(Int_t nEv, MpdTrack *mpdTr, MpdVertex *vtx, FairMCTrack *mctrack
 	//printf("Ev %d: %f\n", nEv, pos.Mag());
 	if(pos.Mag() < 5.){ //only protons close to the collision
 	  Float_t pT = TMath::Abs(mpdTr->GetPt());
-	  Float_t eta = mpdTr->GetEta();
+	  Float_t px = mpdTr->GetPx();
+	  Float_t py = mpdTr->GetPy();
+	  Float_t pz = mpdTr->GetPz();
 	  Float_t chi2 = mpdTr->GetChi2();
 	  Float_t phi = mpdTr->GetPhi();
 	  Float_t theta = mpdTr->GetTheta();
@@ -1387,77 +1388,10 @@ void GetProtons(Int_t nEv, MpdTrack *mpdTr, MpdVertex *vtx, FairMCTrack *mctrack
 	  Float_t dca = vec.Mag();
 	  Int_t pdg = mctrack->GetPdgCode();
 	  //printf("\t%f, %d\n", pT, pdg);
-	  PP proton(pMass, pT, p, dedx, eta, chi2, phi, theta, dca, pdg, nEv);
+	  PP proton(pMass, pT, p, px,py,pz, dedx, eta, chi2, phi, theta, dca, pdg, nEv);
 	  vProtons.push_back(proton);
-	  //hSigCOM->Fill(p, dedx);
-	  //hpTCOM->Fill(pT);
 	}
       }
     }
-  }
-  
-  /*pidproton = mpdTr->GetTPCPidProbProton();
-  pidpion = mpdTr->GetTPCPidProbPion();
-  pidkaon = mpdTr->GetTPCPidProbKaon();
-  pMass = mpdTr->GetTofMass2();
-  if ( pidproton > prob && pidproton > pidpion && pidproton > pidkaon && pMass>0.5 && pMass<1.4) {
-    if(mpdTr->GetCharge() == 1){  //taking only protons
-      if(mpdTr->GetNofHits() > 10){ //only tracks with at least 10 points
-      
-
-	TVector3 pos, primVert;
-	//((MpdVertex*)vtxs->First())->Position(primVert);
-	pos = (mpdTr->GetHelix()).origin();
-	vtx->Position(primVert);
-	pos = pos-primVert;
-	if(pos.Mag() < 5.){ //only protons close to the collision
-	  Float_t pT = mpdTr->GetPt();
-	  Float_t p = TMath::Hypot(mpdTr->GetPz(),mpdTr->GetPt());
-	  Float_t eta = mpdTr->GetEta();
-	  Float_t chi2 = mpdTr->GetChi2();
-	  Float_t phi = mpdTr->GetPhi();
-	  Float_t theta = mpdTr->GetTheta();
-	  Float_t dedx = mpdTr->GetdEdXTPC();
-	  TVector3 vec(mpdTr->GetDCAX(), mpdTr->GetDCAY(), mpdTr->GetDCAZ());
-	  Float_t dca = vec.Mag();
-	  Int_t pdg = mctrack->GetPdgCode();
-	  hSigTPC->Fill(p, dedx);
-	  hpTTPC->Fill(pT);
-	}
-      }
-    }
-  }
-
-  pidproton = mpdTr->GetTOFPidProbProton();
-  pidpion = mpdTr->GetTOFPidProbPion();
-  pidkaon = mpdTr->GetTOFPidProbKaon();
-  pMass = mpdTr->GetTofMass2();
-  if ( pidproton > prob && pidproton > pidpion && pidproton > pidkaon && pMass>0.5 && pMass<1.4) {
-    if(mpdTr->GetCharge() == 1){  //taking only protons
-      if(mpdTr->GetNofHits() > 10){ //only tracks with at least 10 points
-      
-
-	TVector3 pos, primVert;
-	//((MpdVertex*)vtxs->First())->Position(primVert);
-	pos = (mpdTr->GetHelix()).origin();
-	vtx->Position(primVert);
-	pos = pos-primVert;
-	if(pos.Mag() < 5.){ //only protons close to the collision
-	  Float_t pT = mpdTr->GetPt();
-	  Float_t p = TMath::Hypot(mpdTr->GetPz(),mpdTr->GetPt());
-	  Float_t eta = mpdTr->GetEta();
-	  Float_t chi2 = mpdTr->GetChi2();
-	  Float_t phi = mpdTr->GetPhi();
-	  Float_t theta = mpdTr->GetTheta();
-	  Float_t dedx = mpdTr->GetdEdXTPC();
-	  TVector3 vec(mpdTr->GetDCAX(), mpdTr->GetDCAY(), mpdTr->GetDCAZ());
-	  Float_t dca = vec.Mag();
-	  Int_t pdg = mctrack->GetPdgCode();
-	  hSigTOF->Fill(p, dedx);
-	  hpTTOF->Fill(pT);
-	}
-      }
-    }
-    }*/
-  
+  }  
 }

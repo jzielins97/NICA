@@ -12,7 +12,7 @@ Repository for macros written for mpdroot proton-lambda analysis
   Macro uses a txt file (example: "phsd-8M.txt") with list of mpddst.root files as input (it should have absolute path to the mpddst.root file).
   You have to change path to Chain1.C in AnaLambda.C to the path on your computer.
   
-  To run: start root with "root" command. Load macro with ".L AnalLambda.C++", it will build library necessary for the macro. Then start function with "AnalOm(0, 100)". First parameter should be 0 and second is a number of events to be considered.
+  To run: start root with "root" command. Load macro with ".L AnalLambda.C++", it will build library necessary for the macro. Then start function with "AnaLam(0, 100)". First parameter is a number of primary event  and second is a number of last event to be considered. Setting second parameter to 0 will result in calculating all events.
   
   ### CF1D.C
   Macro for creating correlation function of protons and lambdas. It uses out from AnaLambda.C macro as input. Function CF1D creates nominator and denominator of of correlation function. Corr function calculates correlation function.
