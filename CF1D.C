@@ -404,18 +404,18 @@ void Corr(void){
 	den = dynamic_cast<TH1D*>(ifile->Get("hCFden_"+binnames[ipt]+"_"+systems[system])->Clone());
 	ofile->cd();
 	
-	double minRange = 0.1; //0.1
+	double minRange = 0.0; //0.1
 	double maxRange = 0.2; //0.2
 
 	int numBinMin = num->FindBin(minRange);
 	int numBinMax = num->FindBin(maxRange);
 	double sn = (num->Integral(numBinMin,numBinMax, "width"));
-	//sn = num->GetEntries();
+	sn = num->GetEntries();
 	
 	int denBinMin = num->FindBin(minRange);
 	int denBinMax = num->FindBin(maxRange);
 	double sd = (den->Integral(denBinMin,denBinMax, "width"));
-	//sd = den->GetEntries();
+	sd = den->GetEntries();
 	
 	//num->Scale(1.0/sn);
 	//den->Scale(1.0/sd);
@@ -436,7 +436,7 @@ void Corr(void){
 	num->GetYaxis()->SetLabelSize(0.02);
 	
 	num->SetName("CF_"+systems[system]+"_"+binnames[ipt]);
-	num->GetYaxis()->SetRangeUser(0.0, 1.2);
+	//num->GetYaxis()->SetRangeUser(0.0, 1.2);
 	num->Write();
 	cout<<"CF calculated for "<<systems[system]<<" ["<<binnames[ipt]<<"]"<<endl;
       }
