@@ -119,7 +119,7 @@ void fcn(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par, Int_t iflag);
 void ApplyPid(MpdPid *pid, vector<Int_t> &vecP, vector<Int_t> &vecPi);
 TChain* Chain(Int_t nFiles, TString firstFile);
 TChain* ChainFile(Int_t nFiles, TString fileNameList, Int_t skipLines);
-void GetProtons(Int_t nEv, MpdTrack *mpdTr, MpdVertex *vtx, FairMCTrack *mctrack);
+void GetProtons(Int_t nEv, Int_t trNo, MpdTrack *mpdTr, MpdVertex *vtx, FairMCTrack *mctrack);
 
 Float_t massh, pth, ph, etah, yh, chi2h, disth, path, c2pv, d2pv, masshL, chi2hL, disthL, pathL, angL;
 Float_t etas[2], ps[2], pts[2], chi2s[2], dcas[2], probs[2], chi2sL[2], dcasL[2], angle, masshL1, chi2hL1, b0;
@@ -136,7 +136,7 @@ public:
   L0(Float_t imassh, Float_t ipth, Float_t iph, Float_t ipxh, Float_t ipyh, Float_t ipzh, Float_t ietah, Float_t iyh, Float_t ichi2h, Float_t idisth, 
      Float_t ipath, Float_t iangle, Float_t *ietas, Float_t *ips, Float_t *ipts, Float_t *ichi2s, Float_t *idcas, 
      Float_t idca, Float_t ic2pv, Float_t iomega1, Float_t iomega2, 
-     Int_t *iorigs, Int_t *iqs, Int_t *ilayMx, Int_t ievNo) : 
+     Int_t *iorigs, Int_t *iqs, Int_t *ilayMx, Int_t *itrNo, Int_t ievNo) : 
     massh(imassh), pth(ipth), ph(iph), pxh(ipxh),pyh(ipyh),pzh(ipzh), etah(ietah), yh(iyh), chi2h(ichi2h), disth(idisth), path(ipath),
     angle(iangle), dca(idca), c2pv(ic2pv), omega1(iomega1), omega2(iomega2), evNo(ievNo) {
     for (Int_t j = 0; j < 2; ++j) {
@@ -148,11 +148,12 @@ public:
       origs[j] = iorigs[j];
       qs[j] = iqs[j];
       layMx[j] = ilayMx[j];
+      trNo[j] = itrNo[j];
     }
   }
   Float_t massh, pth, ph, pxh, pyh, pzh, etah, yh, chi2h, disth, path, angle, etas[2], ps[2], pts[2], chi2s[2], dcas[2];
   Float_t dca, c2pv, omega1, omega2;
-  Int_t origs[2], qs[2], layMx[2], evNo;
+  Int_t origs[2], qs[2], layMx[2], trNo[2], evNo;
 };
 
 struct PP {
@@ -160,13 +161,13 @@ public:
   PP() {}
   PP(Float_t imassh, Float_t ipth, Float_t iph, Float_t ipxh, Float_t ipyh, Float_t ipzh, Float_t idedx, Float_t ietah, Float_t ichi2h, Float_t iphi, Float_t itheta, 
      Float_t idca, 
-     Int_t ipdg, Int_t ievNo) : 
+     Int_t ipdg, Int_t itrNo, Int_t ievNo) : 
     massh(imassh), pth(ipth), ph(iph), pxh(ipxh), pyh(ipyh),pzh(ipzh), dedx(idedx), etah(ietah), chi2h(ichi2h), theta(itheta),
-    phi(iphi), dca(idca), pdg(ipdg), evNo(ievNo) {
+    phi(iphi), dca(idca), pdg(ipdg), trNo(itrNo), evNo(ievNo) {
   }
   Float_t massh, pth, ph, pxh, pyh, pzh, dedx, etah, chi2h, phi, theta;
   Float_t dca;
-  Int_t pdg, evNo;
+  Int_t pdg, trNo, evNo;
 };
 
 std::vector<L0> vLambdas;
@@ -524,7 +525,7 @@ void AnaLam(Int_t n1 = 0, Int_t n2 = 0, Int_t skipFiles = 0, Int_t iset = 1)
     for (Int_t j = 0; j < nMpdTr; ++j) {
       MpdTrack *mpdTr = (MpdTrack*) mpdTracks->UncheckedAt(j);
       FairMCTrack* mctrack = (FairMCTrack*) mcTracks->UncheckedAt(j);
-      GetProtons(i+1, mpdTr, mpdVert, mctrack);
+      GetProtons(i+1, j, mpdTr, mpdVert, mctrack);
       Float_t tmpMomentum = TMath::Hypot(mpdTr->GetPz(),mpdTr->GetPt());
       
       Int_t id = mpdTr->GetID();
@@ -1055,8 +1056,9 @@ void BuildLambda(vector<Int_t> &vecP, vector<Int_t> &vecPi, vector<MpdParticle*>
 	}
 	//((TTree*)gROOT->FindObjectAny("hypers"))->Fill();
 
+	Int_t trNo[2] = {vecPi[ip], vecP[ip]};
 	L0 l0(massh, pth, ph, pxh, pyh, pzh, etah, yh, chi2h, disth, path, angle, etas, ps, pts, chi2s, dcas,
-	      dca, c2pv, omega1, omega2, origs, qs, layMx, evNo);
+	      dca, c2pv, omega1, omega2, origs, qs, layMx, trNo, evNo);
 	vLambdas.push_back(l0);
       } // if (chi2 >= 0 && chi2 < gC2L...
 
@@ -1345,7 +1347,7 @@ TChain* ChainFile(Int_t nFiles, TString fileNameList, Int_t skipLines)
 
 //____________________________________________________________________________
 
-void GetProtons(Int_t nEv, MpdTrack *mpdTr, MpdVertex *vtx, FairMCTrack *mctrack){
+void GetProtons(Int_t nEv, Int_t trNo, MpdTrack *mpdTr, MpdVertex *vtx, FairMCTrack *mctrack){
   Float_t pidproton, pidpion, pidkaon;
   Float_t p = TMath::Hypot(mpdTr->GetPz(),mpdTr->GetPt());
   Float_t pMass = mpdTr->GetTofMass2();
@@ -1388,7 +1390,7 @@ void GetProtons(Int_t nEv, MpdTrack *mpdTr, MpdVertex *vtx, FairMCTrack *mctrack
 	  Float_t dca = vec.Mag();
 	  Int_t pdg = mctrack->GetPdgCode();
 	  //printf("\t%f, %d\n", pT, pdg);
-	  PP proton(pMass, pT, p, px,py,pz, dedx, eta, chi2, phi, theta, dca, pdg, nEv);
+	  PP proton(pMass, pT, p, px,py,pz, dedx, eta, chi2, phi, theta, dca, pdg, trNo, nEv);
 	  vProtons.push_back(proton);
 	}
       }

@@ -1,6 +1,32 @@
 /* Macro reads DST file produced by macro reco.C */
- R__ADD_INCLUDE_PATH($VMCWORKDIR)
- #include "macro/mpd/mpdloadlibs.C"
+#if !defined(__CINT__) || defined(__MAKECINT__)
+// MPD includes
+#include "MpdEvent.h"
+#include "MpdTrack.h"
+#include "MpdHelix.h"
+#include "MpdVertex.h"
+
+// CBM includes
+#include "FairMCTrack.h"
+
+// ROOT includes
+#include <TBranch.h>
+#include <TChain.h>
+#include <TClonesArray.h>
+#include <TFile.h>
+#include <TFolder.h>
+#include <TH1.h>
+#include <TH2.h>
+#include <TMath.h>
+#include <TROOT.h>
+#include <TTree.h>
+#include <TVector3.h>
+#include <TStopwatch.h>
+
+//#include <stdlib.h>
+#include <iostream>
+#include <fstream>
+#endif
 
  void AnalProtonPi(TString infile = "./urqmd34-11gev.list.txt", Int_t evNo = 100000, Float_t prob = 0.3, Int_t combined = 0)
 {
@@ -11,7 +37,7 @@
   // gROOT->LoadMacro("$VMCWORKDIR/macro/mpd/mpdloadlibs.C");
   //  mpdloadlibs(kTRUE,kFALSE); // only reco libs
   //  mpdloadlibs(kTRUE,kTRUE); // all libs
- mpdloadlibs();
+ //mpdloadlibs();
 
 
   TChain *dstTree = new TChain("cbmsim");
@@ -22,8 +48,8 @@
   TString ffname;
   int namegot = 0;
 
-  ifstream *istr = new ifstream(infile);
-  cout<<"opened list file"<<endl;
+  std::ifstream *istr = new std::ifstream(infile);
+  std::cout<<"opened list file"<<std::endl;
   int i=0;
   int filesIn = 0;
   while (!istr->eof())
@@ -36,7 +62,7 @@
       if (fn.Contains(".root"))
   	{
   	  dstTree->Add(fname);
-  	  cout << "Added " << fname << endl;
+	  std::cout << "Added " << fname << std::endl;
 	  filesIn++;
   	  if (!namegot) {
   	    ffname = fname;
@@ -46,14 +72,14 @@
 
   TFile fileDST(ffname.Data());
 
-  cout  << "Reading finished [" << filesIn<<"]"<< endl;
+  std::cout  << "Reading finished [" << filesIn<<"]"<< std::endl;
 
   MpdEvent *event=0;
   dstTree->SetBranchAddress("MPDEvent.", &event);
-  cout<<"MPD track set"<<endl;
+  std::cout<<"MPD track set"<<std::endl;
   TClonesArray *fMCTracks=0;
   dstTree->SetBranchAddress("MCTrack", &fMCTracks);
-  cout<<"MC track set"<<endl;
+  std::cout<<"MC track set"<<std::endl;
   /* TClonesArray *vtxs;
   dstTree->SetBranchAddress("Vertex", &vtxs);
   cout<<"Vertex set"<<endl;*/
@@ -61,9 +87,9 @@
   Float_t tofMass = 0.5;
 
   Int_t events = dstTree->GetEntries();
-  cout << " Number of events in DST file = " << events;
+  std::cout << " Number of events in DST file = " << events;
   if(events > evNo) events = evNo;
-  cout << " taking [" << events << "] "<< endl;
+  std::cout << " taking [" << events << "] "<< std::endl;
 
   //---------------Creating output file name-----------------------------
   TString probType;
@@ -147,7 +173,7 @@
     //    cout << "Got entry " << i << endl;
       //event->Get....
 
-    if(i%1000==0){cout << "Got entry " << i << " out of "<<events<< endl;}
+    if(i%1000==0){std::cout << "Got entry " << i << " out of "<<events<< std::endl;}
 
       mpdTracks = event->GetGlobalTracks();
       Int_t fNtracks = mpdTracks->GetEntriesFast();
@@ -345,8 +371,8 @@
   hetapmc->Write();
   hrapidity->Write();
   
-  cout << " Test passed" << endl;
-  cout << " All ok " << endl;
+  std::cout << " Test passed" << std::endl;
+  std::cout << " All ok " << std::endl;
 
   //  hpt->Draw();
   //  exit(0);
