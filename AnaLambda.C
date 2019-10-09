@@ -93,7 +93,7 @@ const Double_t gDistL    = 9999.;        //cm - DCA between pion & p in V0
 const Double_t gPathL    = 0.0;          //cm - path to Lambda decay
 const Double_t gC2L      = 25.; //9999.;  //chi2 between pion & p in V0
 
-const Double_t gDcaL0 = 0.; //0.15; 
+const Double_t gDcaL0 = 0.; //0.15;
 const Double_t gDcaK = 0.; //0.3;
 const Double_t gChi2K = 0.; //100; //50;
 const Double_t gDecayOm = 0.; //1.0;
@@ -133,10 +133,10 @@ vector<vector<Double_t> > vecL1;
 struct L0 {
 public:
   L0() {}
-  L0(Float_t imassh, Float_t ipth, Float_t iph, Float_t ipxh, Float_t ipyh, Float_t ipzh, Float_t ietah, Float_t iyh, Float_t ichi2h, Float_t idisth, 
-     Float_t ipath, Float_t iangle, Float_t *ietas, Float_t *ips, Float_t *ipts, Float_t *ichi2s, Float_t *idcas, 
-     Float_t idca, Float_t ic2pv, Float_t iomega1, Float_t iomega2, 
-     Int_t *iorigs, Int_t *iqs, Int_t *ilayMx, Int_t *itrNo, Int_t ievNo) : 
+  L0(Float_t imassh, Float_t ipth, Float_t iph, Float_t ipxh, Float_t ipyh, Float_t ipzh, Float_t ietah, Float_t iyh, Float_t ichi2h, Float_t idisth,
+     Float_t ipath, Float_t iangle, Float_t *ietas, Float_t *ips, Float_t *ipts, Float_t *ichi2s, Float_t *idcas,
+     Float_t idca, Float_t ic2pv, Float_t iomega1, Float_t iomega2,
+     Int_t *iorigs, Int_t *iqs, Int_t *ilayMx, Int_t *itrNo, Int_t ievNo) :
     massh(imassh), pth(ipth), ph(iph), pxh(ipxh),pyh(ipyh),pzh(ipzh), etah(ietah), yh(iyh), chi2h(ichi2h), disth(idisth), path(ipath),
     angle(iangle), dca(idca), c2pv(ic2pv), omega1(iomega1), omega2(iomega2), evNo(ievNo) {
     for (Int_t j = 0; j < 2; ++j) {
@@ -159,9 +159,9 @@ public:
 struct PP {
 public:
   PP() {}
-  PP(Float_t imassh, Float_t ipth, Float_t iph, Float_t ipxh, Float_t ipyh, Float_t ipzh, Float_t idedx, Float_t ietah, Float_t ichi2h, Float_t iphi, Float_t itheta, 
-     Float_t idca, 
-     Int_t ipdg, Int_t itrNo, Int_t ievNo) : 
+  PP(Float_t imassh, Float_t ipth, Float_t iph, Float_t ipxh, Float_t ipyh, Float_t ipzh, Float_t idedx, Float_t ietah, Float_t ichi2h, Float_t iphi, Float_t itheta,
+     Float_t idca,
+     Int_t ipdg, Int_t itrNo, Int_t ievNo) :
     massh(imassh), pth(ipth), ph(iph), pxh(ipxh), pyh(ipyh),pzh(ipzh), dedx(idedx), etah(ietah), chi2h(ichi2h), theta(itheta),
     phi(iphi), dca(idca), pdg(ipdg), trNo(itrNo), evNo(ievNo) {
   }
@@ -190,12 +190,12 @@ std::vector<tuple<float,float,float> > *vvvLpt = &vLambPtEtaY;
 //void AnalOm(Int_t n1 = 0, Int_t n2 = 0, Int_t firstFile = 1, Int_t iset = 1)
 void AnaLam(Int_t n1 = 0, Int_t n2 = 0, Int_t skipFiles = 0, Int_t iset = 1)
 {
-  // Analyze TPC (ITS) reco data - reconstruct hyperons 
+  // Analyze TPC (ITS) reco data - reconstruct hyperons
   // (with track refit to account for dE/dx and MS for heavy particles)
 
   // Add particles to PDG database
   //gROOT->ProcessLine(".x $VMCWORKDIR/macro/mpd/AddToPdg.C");
-  
+
   // Load basic libraries
   //gROOT->ProcessLine(".x ~/mpd/loadlibs.C");
 
@@ -278,7 +278,7 @@ void AnaLam(Int_t n1 = 0, Int_t n2 = 0, Int_t skipFiles = 0, Int_t iset = 1)
   TH1D *hMassLbkg = new TH1D("hMassLbkg","Lambda mass (bkg.)",50,1.070,1.170);
 
   TH1D *hPdg = new TH1D("hPdg","PdgCod if is not Pion",1000,-2500,2500);
-  
+
   TH2D *hProbTrueP = new TH2D("hProbTrueP","Probability for true Protons",50,0,1,50,0,1.1);
   TH2D *hProbP = new TH2D("hProbfalseP","Probability for Pions and identification Protons",50,0,1.1,50,0,1.1);
   TH2D *hProbPi = new TH2D("hProbfalsePi","Probability for Protons and identification Pions",50,0,1.1,50,0,1.1);
@@ -293,7 +293,7 @@ void AnaLam(Int_t n1 = 0, Int_t n2 = 0, Int_t skipFiles = 0, Int_t iset = 1)
   new TH1D("hpTTPC", "p_{T} distribution (TPC only);#it{p_{T}} (GeV/#it{c});dN/d#{p_{T}}", 100, 0.0, 2.0);
   new TH1D("hpTTOF", "p_{T} distribution (TOF only);#it{p_{T}} (GeV/#it{c});dN/d#{p_{T}}", 100, 0.0, 2.0);
   new TH1D("hpTCOM", "p_{T} distribution ;#it{p_{T}} (GeV/#it{c});dN/d#{p_{T}}", 100, 0.0, 2.0);*/
-  
+
   Double_t pmom, eta1, dpp, rorig, ptt;
   Int_t prim, idtr, np, moth, pdg;
 
@@ -322,7 +322,7 @@ void AnaLam(Int_t n1 = 0, Int_t n2 = 0, Int_t skipFiles = 0, Int_t iset = 1)
     mcHeader->GetVertex(genVert);
 
     // For ITS points
-    TVector3 mom; 
+    TVector3 mom;
     set<Int_t> idxs;
     if (itsPoints) {
       Int_t nITSp = itsPoints->GetEntriesFast();
@@ -347,7 +347,7 @@ void AnaLam(Int_t n1 = 0, Int_t n2 = 0, Int_t skipFiles = 0, Int_t iset = 1)
     Int_t nMC = mcTracks->GetEntriesFast();
     Int_t skip = 0;
     vLambPtEtaY.clear();
-    
+
     for (Int_t j = 0; j < nMC; ++j) {
       vProtons.clear();
       FairMCTrack* mcTr = (FairMCTrack*) mcTracks->UncheckedAt(j);
@@ -397,7 +397,7 @@ void AnaLam(Int_t n1 = 0, Int_t n2 = 0, Int_t skipFiles = 0, Int_t iset = 1)
     if (event) mpdTracks = event->GetGlobalTracks();
     if (mpdTracks) nMpdTr = mpdTracks->GetEntriesFast();
 
-    cout << " *** Event No: " << i << ", reco tracks in TPC (ITS), global: " << " " << nITS 
+    cout << " *** Event No: " << i << ", reco tracks in TPC (ITS), global: " << " " << nITS
 	 << " " << nMpdTr << ", vertices: " << nVert << endl;
     MpdVertex *vtx = (MpdVertex*) vtxs->First();
     mpdVert = vtx;
@@ -407,13 +407,13 @@ void AnaLam(Int_t n1 = 0, Int_t n2 = 0, Int_t skipFiles = 0, Int_t iset = 1)
     set<int> indxVert;
     for (Int_t k = 0; k < nPrim; ++k) indxVert.insert((*indxs)[k]);
     //cout << " Number of primary (used for vertex reco) tracks: " << indxVert.size() << endl;
-    
-    // Find TPC track IDs 
+
+    // Find TPC track IDs
     Int_t nPoints = 0, idMax = 0;
     for (Int_t j = 0; j < nITS; ++j) {
       MpdKalmanTrack *tr = (MpdKalmanTrack*) itsTracks->UncheckedAt(j);
       idMax = TMath::Max(idMax,tr->GetTrackID());
-    } 
+    }
     //}
     //cout << " Max ID: " << idMax << endl;
     Int_t *ids = new Int_t [idMax+1];
@@ -432,8 +432,8 @@ void AnaLam(Int_t n1 = 0, Int_t n2 = 0, Int_t skipFiles = 0, Int_t iset = 1)
     FairMCPoint **point = new FairMCPoint* [idMax+1];
     AzTrack **track = new AzTrack* [idMax+1];
 
-    for (Int_t j = 0; j <= idMax; ++j) { 
-      ids[j] = lays[j] = 0; 
+    for (Int_t j = 0; j <= idMax; ++j) {
+      ids[j] = lays[j] = 0;
       point[j] = 0x0;
       track[j] = 0x0;
       dZ[j] = 999999;
@@ -491,7 +491,7 @@ void AnaLam(Int_t n1 = 0, Int_t n2 = 0, Int_t skipFiles = 0, Int_t iset = 1)
 	      track[id]->SetChi2(-9.);
 	      track[id] = tr;
 	    }
-	  } 
+	  }
 	  point[id] = p1;
 	} else {
 	  // No MC points
@@ -527,7 +527,7 @@ void AnaLam(Int_t n1 = 0, Int_t n2 = 0, Int_t skipFiles = 0, Int_t iset = 1)
       FairMCTrack* mctrack = (FairMCTrack*) mcTracks->UncheckedAt(j);
       GetProtons(i+1, j, mpdTr, mpdVert, mctrack);
       Float_t tmpMomentum = TMath::Hypot(mpdTr->GetPz(),mpdTr->GetPt());
-      
+
       Int_t id = mpdTr->GetID();
       if (id > idMax || track[id] == 0x0) continue;
       if (ids[id] == 1) {
@@ -564,7 +564,7 @@ void AnaLam(Int_t n1 = 0, Int_t n2 = 0, Int_t skipFiles = 0, Int_t iset = 1)
     //*/
 
     // Lambda acceptance
-    
+
     multimap<Int_t,Int_t> mapLamb;
     for (Int_t j = 0; j <= idMax; ++j) {
       FairMCTrack* mcTr = (FairMCTrack*) mcTracks->UncheckedAt(j);
@@ -589,7 +589,7 @@ void AnaLam(Int_t n1 = 0, Int_t n2 = 0, Int_t skipFiles = 0, Int_t iset = 1)
 	  if (moths[j] == pdgCodeL0 && (pdgs[j] == pdgCodePr || pdgs[j] == pdgCodeNeg)) mapLamb.insert(pair<Int_t,Int_t>(mothID,j));
 	}
       }
-      //if ((pdgs[j] == pdgCodePos || pdgs[j] == pdgCodeNeg) && moths[j] == pdgCodeL0) 
+      //if ((pdgs[j] == pdgCodePos || pdgs[j] == pdgCodeNeg) && moths[j] == pdgCodeL0)
       //hPtVsEtaS->Fill(TMath::Abs(mom.Eta()),mom.Pt());
     }
 
@@ -607,7 +607,7 @@ void AnaLam(Int_t n1 = 0, Int_t n2 = 0, Int_t skipFiles = 0, Int_t iset = 1)
 
       for (mit1 = ret.first; mit1 != ret.second; ++mit1) {
 	FairMCTrack* mcTr = (FairMCTrack*) mcTracks->UncheckedAt(mit1->second);
-	if (mcTr->GetPdgCode() == pdgCodePr) nppi[0] = 1; 
+	if (mcTr->GetPdgCode() == pdgCodePr) nppi[0] = 1;
 	else if (mcTr->GetPdgCode() == pdgCodeNeg) nppi[1] = 1;
 	//cout << mcTr->GetPdgCode() << endl;
 	mcTr->GetMomentum(mom);
@@ -617,23 +617,23 @@ void AnaLam(Int_t n1 = 0, Int_t n2 = 0, Int_t skipFiles = 0, Int_t iset = 1)
 	if ((TMath::Abs(mom.Eta())< 1.3) && mom.Pt()> 0.1) ++nok2;
 	if ((TMath::Abs(mom.Eta())< 1.3) && mom.Pt()> 0.2) ++nok3;
       }
-      if (nppi[0] != 1 || nppi[1] != 1) { 
-	// not p - p- decay   
-	//cout << " Wrong decay mode !!! " << endl; 
+      if (nppi[0] != 1 || nppi[1] != 1) {
+	// not p - p- decay
+	//cout << " Wrong decay mode !!! " << endl;
 	mit = mapLamb.upper_bound(mothID);
-	continue; 
+	continue;
       }
 
       if (nppi[0] == 1 && nppi[1] == 1) hLambFlag->Fill(1);
-      if (nok == 2) hLambFlag->Fill(2); 
-      if (nok1 == 2) hLambFlag->Fill(4); 
-      if (nok2 == 2) hLambFlag->Fill(6); 
-      if (nok3 == 2) hLambFlag->Fill(8); 
+      if (nok == 2) hLambFlag->Fill(2);
+      if (nok1 == 2) hLambFlag->Fill(4);
+      if (nok2 == 2) hLambFlag->Fill(6);
+      if (nok3 == 2) hLambFlag->Fill(8);
 
       mit = mapLamb.upper_bound(mothID);
     } // while (mit != mapLamb.end())
-  
-    // Track selection 
+
+    // Track selection
     ntr13 = 0;
     for (Int_t j = 0; j < nITS; ++j) {
       AzTrack *tr = (AzTrack*) itsTracks->UncheckedAt(j);
@@ -645,7 +645,7 @@ void AnaLam(Int_t n1 = 0, Int_t n2 = 0, Int_t skipFiles = 0, Int_t iset = 1)
       //if (TMath::Abs(lays[id]) < 41 || TMath::Abs(etaRec) > 1.3) tr->SetChi2(-9.); // flag
       if (TMath::Abs(lays[id]) < -41 || TMath::Abs(etaRec) > 1.3) tr->SetChi2(-9.); // flag
       Int_t iQ = tr->Charge();
-      
+
 #ifdef ITS
       if (TString(tr->ClassName()).Contains("Its") && tr->GetNofHits() - tr->GetNofIts() < 10) tr->SetChi2(-9.);
 #else
@@ -654,7 +654,7 @@ void AnaLam(Int_t n1 = 0, Int_t n2 = 0, Int_t skipFiles = 0, Int_t iset = 1)
       if (tr->GetChi2() < -8) continue;
       // Create MpdHelix
       MpdHelix helix = MakeHelix(tr);
-      
+
       // Get 3-D DCA to primary vertex
       TVector3 pca;
       Double_t s = helix.pathLength(primVert);
@@ -678,16 +678,16 @@ void AnaLam(Int_t n1 = 0, Int_t n2 = 0, Int_t skipFiles = 0, Int_t iset = 1)
       Int_t id = tr->GetTrackID();
       FairMCTrack* mcTr = (FairMCTrack*) mcTracks->UncheckedAt(id);
       // !!!
-      if (mcTr->GetMotherId() == 0 && 
+      if (mcTr->GetMotherId() == 0 &&
 	  ((FairMCTrack*)mcTracks->UncheckedAt(0))->GetPdgCode() == 1010010030) continue; // !!! decay product of artificial H3L
       // !!!
       //*MC ID
       //if (mcTr->GetPdgCode() == pdgCodePr && tr->Charge() == 1) vecP.push_back(j);
       //else if (mcTr->GetPdgCode() == pdgCodeNeg && tr->Charge() == -1) vecPi.push_back(j);
       //else if (mcTr->GetPdgCode() == pdgCodeKm && tr->Charge() == -1) vecK.push_back(j);
-      if (mcTr->GetPdgCode() == pdgCodePr && tr->Charge() == 
+      if (mcTr->GetPdgCode() == pdgCodePr && tr->Charge() ==
 	  TMath::Nint(TDatabasePDG::Instance()->GetParticle(pdgCodePr)->Charge()/3)) vecP.push_back(j);
-      else if (mcTr->GetPdgCode() == pdgCodeNeg && tr->Charge() == 
+      else if (mcTr->GetPdgCode() == pdgCodeNeg && tr->Charge() ==
 	       TMath::Nint(TDatabasePDG::Instance()->GetParticle(pdgCodeNeg)->Charge()/3)) vecPi.push_back(j);
       //*/
       if (mcTr->GetPdgCode() == pdgCodePos && tr->Charge() == 1) hRecognitionFlag->Fill(1);
@@ -707,15 +707,15 @@ void AnaLam(Int_t n1 = 0, Int_t n2 = 0, Int_t skipFiles = 0, Int_t iset = 1)
 	// Fill if not Proton
         if (mcTr->GetPdgCode() != pdgCodePos) hRecognitionFlag->Fill(3); //false proton
 	hProbP->Fill(pProb[id],piProb[id]);
-      }	
-      else if (tr->Charge() == -1 && piProb[id] > pProb[id] && piProb[id] > kProb[id] && piProb[id] > eProb[id] 	
+      }
+      else if (tr->Charge() == -1 && piProb[id] > pProb[id] && piProb[id] > kProb[id] && piProb[id] > eProb[id]
 	       && piProb[id] > 0.25) {
 	//vecPi.push_back(j);
         hProbTrueK->Fill(kProb[id],piProb[id]);
 	// Fill if Pion
 	if (mcTr->GetPdgCode() == pdgCodeNeg){
 	  hRecognitionFlag->Fill(6); // true pion
-	  hProbTruePi->Fill(pProb[id],piProb[id]);	  
+	  hProbTruePi->Fill(pProb[id],piProb[id]);
 	 // if (piProb[id] > eProb[id]) hRecognitionFlag->Fill(8);
 	}
 	// Fill if not Pion
@@ -725,7 +725,7 @@ void AnaLam(Int_t n1 = 0, Int_t n2 = 0, Int_t skipFiles = 0, Int_t iset = 1)
 	  hPdg->Fill(mcTr->GetPdgCode());
 	  hProbPi->Fill(pProb[id],piProb[id]);
 	}
-      }	
+      }
     }
 
 
@@ -763,7 +763,7 @@ void AnaLam(Int_t n1 = 0, Int_t n2 = 0, Int_t skipFiles = 0, Int_t iset = 1)
     delete [] id2dst;
     delete [] track;
   } // for (Int_t i = 0; i < events;
-  
+
   //TFile out("tpc.histo.root","recreate");
   /*
   TH1D *hEff1 = (TH1D*) hrec->Clone("hEff");
@@ -800,7 +800,7 @@ void RecoEff(vector<Int_t> &vecP, vector<Int_t> &vecPi, Int_t pid)
     FairMCTrack *mcTr = (FairMCTrack*) mcTracks->UncheckedAt(trP->GetTrackID());
     Int_t mothId = mcTr->GetMotherId();
     if (mothId < 0) continue;
-    FairMCTrack *moth = (FairMCTrack*) mcTracks->UncheckedAt(mothId);  
+    FairMCTrack *moth = (FairMCTrack*) mcTracks->UncheckedAt(mothId);
     if (moth->GetPdgCode() == pdgCodeL0) {
       Int_t mp = mothId;
       // Proton from Lambda
@@ -810,7 +810,7 @@ void RecoEff(vector<Int_t> &vecP, vector<Int_t> &vecPi, Int_t pid)
 	FairMCTrack *mcTr = (FairMCTrack*) mcTracks->UncheckedAt(trPi->GetTrackID());
 	Int_t mothId = mcTr->GetMotherId();
 	if (mothId < 0) continue;
-	FairMCTrack *moth = (FairMCTrack*) mcTracks->UncheckedAt(mothId);  
+	FairMCTrack *moth = (FairMCTrack*) mcTracks->UncheckedAt(mothId);
 	if (moth->GetPdgCode() == pdgCodeL0 && mp == mothId) {
 	  ((TH1D*)gROOT->FindObjectAny("hLambFlag"))->Fill(10);
 	  //AZ - flag decay tracks to check PID influence later
@@ -850,7 +850,7 @@ void RecoEff(vector<Int_t> &vecP, vector<Int_t> &vecPi, Int_t pid)
       // Pion
       AzTrack *trPi = (AzTrack*) itsTracks->UncheckedAt(vecPi[jpi]);
       AzTrack trCor = *trPi;
- 
+
       /*
       recoTpc->Refit(&trCor, 0.13957, 1); // refit
       MpdParticle pion(trCor, vecPi[jpi]);
@@ -865,7 +865,7 @@ void RecoEff(vector<Int_t> &vecP, vector<Int_t> &vecPi, Int_t pid)
 }
 
 //__________________________________________________________________________
-MpdHelix MakeHelix(const MpdKalmanTrack *tr) 
+MpdHelix MakeHelix(const MpdKalmanTrack *tr)
 {
   Double_t r = tr->GetPosNew();
   Double_t phi = tr->GetParam(0) / r;
@@ -881,7 +881,7 @@ MpdHelix MakeHelix(const MpdKalmanTrack *tr)
 }
 
 //__________________________________________________________________________
-MpdHelix MakeHelix(const MpdParticle *part) 
+MpdHelix MakeHelix(const MpdParticle *part)
 {
   Double_t dip = TMath::PiOver2() - part->Theta();
   Double_t cur = TMath::Abs (part->GetMeas(4));
@@ -893,10 +893,10 @@ MpdHelix MakeHelix(const MpdParticle *part)
   TVector3 o(x, y, part->GetMeas(1));
   MpdHelix helix(cur, dip, phase, o, h);
   return helix;
-}  
+}
 
 //__________________________________________________________________________
-void BuildLambda(vector<Int_t> &vecP, vector<Int_t> &vecPi, vector<MpdParticle*> &vecL) 
+void BuildLambda(vector<Int_t> &vecP, vector<Int_t> &vecPi, vector<MpdParticle*> &vecL)
 {
   // Make antilambdas
 
@@ -964,11 +964,11 @@ void BuildLambda(vector<Int_t> &vecP, vector<Int_t> &vecPi, vector<MpdParticle*>
 	if (origs[1] > 0) origs[1] = -1;
 	FairMCTrack *moth = NULL;
 	((TH1D*)gROOT->FindObjectAny("hMassL"))->Fill(lambPart.GetMass());
-	
+
 	//*********************************TH2D for Mass and pT **************************//
 	((TH2D*)gROOT->FindObjectAny("hMassPtL"))->Fill(lambPart.GetMass(), lambPart.Pt());
 	//********************************************************************************//
-	
+
 	if (mothId != mothId1 || mothId < 0) {
 	  ((TH1D*)gROOT->FindObjectAny("hMassLbkg"))->Fill(lambPart.GetMass());
 	} else {
@@ -1005,8 +1005,8 @@ void BuildLambda(vector<Int_t> &vecP, vector<Int_t> &vecPi, vector<MpdParticle*>
 	Float_t pxh = (lambPart.Momentum3()).Px(); // reconstructed
 	Float_t pyh = (lambPart.Momentum3()).Py(); // reconstructed
 	Float_t pzh = (lambPart.Momentum3()).Pz(); // reconstructed
-        if (pth > 0.001) etah = lambPart.Momentum3().Eta(); 
-        else etah = TMath::Sign(100.,lambPart.Momentum3().Z()); 
+        if (pth > 0.001) etah = lambPart.Momentum3().Eta();
+        else etah = TMath::Sign(100.,lambPart.Momentum3().Z());
 	pair<Double_t,Double_t> paths = helix.pathLengths(helix1);
 	TVector3 p1 = helix.at(paths.first);
 	TVector3 p2 = helix1.at(paths.second);
@@ -1043,7 +1043,7 @@ void BuildLambda(vector<Int_t> &vecP, vector<Int_t> &vecPi, vector<MpdParticle*>
 	  vecL1.push_back(lambPars);
 	  //cout << chi2 << " " << lambPart.GetMass() << " " << vecL.size() << " " << trPi->Charge() << " " << trP->Charge() << " " << trPi->GetTrackID() << " " << trP->GetTrackID() << endl;
 	}
-	
+
 	if (origs[0] == 1) {
 	  // True lambda
 	  //pth = moth->GetPt();
@@ -1101,12 +1101,12 @@ Double_t DistHelLin(MpdKalmanTrack *helix, MpdParticle *neu)
   static Double_t step[2] = {0.1, 0.1};
   gMinuit->mnparm(0, "lengN", vstart[0], step[0], 0,0,ierflg);
   gMinuit->mnparm(1, "lengC", vstart[1], step[1], 0,0,ierflg);
-    
+
   // Now ready for minimization step
   arglist[0] = 500;
   arglist[1] = 1.;
   gMinuit->mnexcm("MIGRAD", arglist, 2, ierflg);
-  
+
   // Get results
   Double_t amin,edm,errdef;
   Int_t nvpar,nparx,icstat;
@@ -1123,7 +1123,7 @@ void fcn(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par, Int_t iflag)
   mom *= par[0];
   TVector3 posN = vtxN;
   posN += mom;
-  
+
   TVector3 posC = trC.at(par[1]);
   posC -= posN;
   f = posC.Mag();
@@ -1148,7 +1148,7 @@ void ApplyPid(MpdPid *pid, vector<Int_t> &vecP, vector<Int_t> &vecPi)
       Int_t mid = trP->GetUniqueID();
       if (mapL.find(mid) == mapL.end()) { set<Int_t> aaa; mapL[mid] = aaa; }
       mapL[mid].insert(vecP[ip]);
-      trP->SetUniqueID(0); // reset 
+      trP->SetUniqueID(0); // reset
     }
   }
 
@@ -1159,13 +1159,13 @@ void ApplyPid(MpdPid *pid, vector<Int_t> &vecP, vector<Int_t> &vecPi)
       Int_t mid = trP->GetUniqueID();
       if (mapL.find(mid) == mapL.end()) { set<Int_t> aaa; mapL[mid] = aaa; }
       mapL[mid].insert(vecPi[ip]);
-      trP->SetUniqueID(0); // reset 
+      trP->SetUniqueID(0); // reset
     }
   }
   /* Test
-  for (map<Int_t,Int_t>::iterator mit = mapL.begin(); mit != mapL.end(); ++mit) 
+  for (map<Int_t,Int_t>::iterator mit = mapL.begin(); mit != mapL.end(); ++mit)
     if (mit->second != 2) { cout << " Very strange 1 !!! " << mit->second << endl; exit(0); }
-  for (map<Int_t,Int_t>::iterator mit = mapXi.begin(); mit != mapXi.end(); ++mit) 
+  for (map<Int_t,Int_t>::iterator mit = mapXi.begin(); mit != mapXi.end(); ++mit)
     if (mit->second != 3) { cout << " Very strange 2 !!! " << mit->second << endl; exit(0); }
   */
 
@@ -1188,7 +1188,7 @@ void ApplyPid(MpdPid *pid, vector<Int_t> &vecP, vector<Int_t> &vecPi)
       if (moth->GetPdgCode() == pdgCodeH3L) continue; // track from artificial H3L
     }
     */
-    
+
     MpdTrack* mpdTrack = (MpdTrack*) mpdTracks->UncheckedAt(j);
     if (mpdTrack->GetID() != id) { /*cout << id << " " << mpdTrack->GetID() << endl;*/ Fatal("ApplyPid"," Different ID"); }
 
@@ -1249,7 +1249,7 @@ void ApplyPid(MpdPid *pid, vector<Int_t> &vecP, vector<Int_t> &vecPi)
       } else if (mcTr->GetPdgCode() == pdgCodePr) hFlag->Fill(6.1); // lost proton
     }
     // GetProbKa(), GetProbEl(), GetProbPr(), GetProbDe(), GetProbHe3
-  }    
+  }
   //cout << " Number of p, pi: " << vecP.size() << " " << vecPi.size() << endl;
 
   //
@@ -1270,7 +1270,7 @@ TChain* Chain(Int_t nFiles, TString firstFile)
   // File name parsing
 
   Int_t ndash = 0, ndashOK = 2;
-  
+
   // Get first file number
   Int_t leng = firstFile.Length(), i1 = 0, i2 = 0;
   //cout << leng << endl;
@@ -1355,7 +1355,7 @@ void GetProtons(Int_t nEv, Int_t trNo, MpdTrack *mpdTr, MpdVertex *vtx, FairMCTr
   Float_t prob = 0.3;
 
 
-  if(p>0.75){  
+  if(p>0.75){
     pidproton = mpdTr->GetPidProbProton();
     pidpion = mpdTr->GetPidProbPion();
     pidkaon = mpdTr->GetPidProbKaon();
@@ -1364,12 +1364,12 @@ void GetProtons(Int_t nEv, Int_t trNo, MpdTrack *mpdTr, MpdVertex *vtx, FairMCTr
     pidpion = mpdTr->GetTPCPidProbPion();
     pidkaon = mpdTr->GetTPCPidProbKaon();
   }
-  
-  
+
+
   if ( pidproton > prob && pidproton > pidpion && pidproton > pidkaon && pMass>0.5 && pMass<1.4) {
     if(mpdTr->GetCharge() == 1 && TMath::Abs(eta) < 1.3){  //taking only protons
       if(mpdTr->GetNofHits() > 10){ //only tracks with at least 10 points
-      
+
 
 	TVector3 pos, primVert;
 	//((MpdVertex*)vtxs->First())->Position(primVert);
@@ -1395,5 +1395,5 @@ void GetProtons(Int_t nEv, Int_t trNo, MpdTrack *mpdTr, MpdVertex *vtx, FairMCTr
 	}
       }
     }
-  }  
+  }
 }

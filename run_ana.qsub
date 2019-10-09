@@ -1,0 +1,21 @@
+#!/bin/bash
+#$ -N PL0-11GeV
+#$ -j y
+#$ -cwd
+#$ -o /eos/nica/mpd/users/zielinski/work/analysis/lambdas/lambda_new/
+#$ -e /eos/nica/mpd/users/zielinski/work/analysis/lambdas/lambda_new/
+# request Bourne again shell as shell for job
+#$ -S /bin/bash
+
+echo "  Start date: $(date) $(hostname)"
+
+source /eos/nica/mpd/users/zielinski/opt/mpdroot/build/config.sh
+
+cd /eos/nica/mpd/users/zielinski/work/analysis/lambdas/lambda_new/
+root -b -l<<EOF
+.L AnaLambda.C++
+AnaLam(0, 100000)
+.q
+EOF
+
+echo "  End date: $(date)"
