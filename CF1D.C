@@ -42,7 +42,7 @@ public:
   L0(Float_t imassh, Float_t ipth, Float_t iph, Float_t ipxh, Float_t ipyh, Float_t ipzh, Float_t ietah, Float_t iyh, Float_t ichi2h, Float_t idisth, 
      Float_t ipath, Float_t iangle, Float_t *ietas, Float_t *ips, Float_t *ipts, Float_t *ichi2s, Float_t *idcas, 
      Float_t idca, Float_t ic2pv, Float_t iomega1, Float_t iomega2, 
-     Int_t *iorigs, Int_t *iqs, Int_t *ilayMx, Int_t ievNo) : 
+     Int_t *iorigs, Int_t *iqs, Int_t *ilayMx, Int_t *itrNo, Int_t ievNo) : 
     massh(imassh), pth(ipth), ph(iph), pxh(ipxh),pyh(ipyh),pzh(ipzh), etah(ietah), yh(iyh), chi2h(ichi2h), disth(idisth), path(ipath),
     angle(iangle), dca(idca), c2pv(ic2pv), omega1(iomega1), omega2(iomega2), evNo(ievNo) {
     for (Int_t j = 0; j < 2; ++j) {
@@ -54,11 +54,12 @@ public:
       origs[j] = iorigs[j];
       qs[j] = iqs[j];
       layMx[j] = ilayMx[j];
+      trNo[j] = itrNo[j];
     }
   }
   Float_t massh, pth, ph, pxh, pyh, pzh, etah, yh, chi2h, disth, path, angle, etas[2], ps[2], pts[2], chi2s[2], dcas[2];
   Float_t dca, c2pv, omega1, omega2;
-  Int_t origs[2], qs[2], layMx[2], evNo;
+  Int_t origs[2], qs[2], layMx[2], trNo[2], evNo;
 };
 
 struct PP {
@@ -66,22 +67,22 @@ public:
   PP() {}
   PP(Float_t imassh, Float_t ipth, Float_t iph, Float_t ipxh, Float_t ipyh, Float_t ipzh, Float_t idedx, Float_t ietah, Float_t ichi2h, Float_t iphi, Float_t itheta, 
      Float_t idca, 
-     Int_t ipdg, Int_t ievNo) : 
+     Int_t ipdg, Int_t itrNo, Int_t ievNo) : 
     massh(imassh), pth(ipth), ph(iph), pxh(ipxh), pyh(ipyh),pzh(ipzh), dedx(idedx), etah(ietah), chi2h(ichi2h), theta(itheta),
-    phi(iphi), dca(idca), pdg(ipdg), evNo(ievNo) {
+    phi(iphi), dca(idca), pdg(ipdg), trNo(itrNo), evNo(ievNo) {
   }
   Float_t massh, pth, ph, pxh, pyh, pzh, dedx, etah, chi2h, phi, theta;
   Float_t dca;
-  Int_t pdg, evNo;
+  Int_t pdg, trNo, evNo;
 };
 
 
 struct Particle{
 public:
   Particle() {}
-  Particle(Float_t ip, Float_t iPt, Float_t ipx, Float_t ipy, Float_t ipz, Float_t iE, Float_t ieta, Float_t iphi, Int_t ievent, Int_t ipdg) : p(ip), Pt(iPt), px(ipx), py(ipy), pz(ipz), E(iE), eta(ieta), phi(iphi), event(ievent), pdg(ipdg) {}
+  Particle(Float_t ip, Float_t iPt, Float_t ipx, Float_t ipy, Float_t ipz, Float_t iE, Float_t ieta, Float_t iphi, Int_t ievent, Int_t ipdg, Int_t itrNo) : p(ip), Pt(iPt), px(ipx), py(ipy), pz(ipz), E(iE), eta(ieta), phi(iphi), event(ievent), pdg(ipdg), trNo(itrNo) {}
   Float_t p, Pt,px,py,pz, E, eta, phi;
-    Int_t event, pdg;
+  Int_t event, pdg, trNo;
 };
 
 const TString systems[]={
@@ -195,7 +196,7 @@ void Cf(){
 	
 	Float_t E = TMath::Sqrt(L.ph*L.ph+L.massh*L.massh);
 	if( L.origs[0] > 0){
-	  Particle par(L.ph, L.pth, L.pxh, L.pyh, L.pzh, E, L.etah, L.angle, i+ij, pdgCodeL0);
+	  Particle par(L.ph, L.pth, L.pxh, L.pyh, L.pzh, E, L.etah, L.angle, i+ij, pdgCodeL0, L.trNo[1]);
 	  //Particle par(L.ph, L.pth, E, L.evNo, pdgCodeL0);
 	  part[pcount+l0No] = par;
 	  l0No++;
@@ -211,7 +212,7 @@ void Cf(){
 
 	Float_t E = TMath::Sqrt(P.ph*P.ph+P.massh*P.massh);
 	//cout<<"P: E="<<E<<" p="<<P.ph<<endl;
-	Particle par(TMath::Abs(P.ph), TMath::Abs(P.pth), P.pxh, P.pyh, P.pzh,E,P.etah, P.phi, i+ij, pdgCodePr);
+	Particle par(TMath::Abs(P.ph), TMath::Abs(P.pth), P.pxh, P.pyh, P.pzh,E,P.etah, P.phi, i+ij, pdgCodePr, P.trNo);
 	//Particle par(P.ph, P.pth, E, P.evNo, pdgCodePr);
 	part[pcount+ijk] = par;
       }
@@ -284,6 +285,7 @@ void Cf(){
 	      }
 	    }
 	  }else if(par2.pdg==pdgCodeL0){ //particle 1 is proton, particle 2 is lambda
+	    if(par1.trNo == par2.trNo) continue;
 	    for(int ipt = 0; ipt<NPT; ipt++){
 	      //if(kt>pt_low[ipt] && kt<pt_high[ipt]){
 	      if(kt>0.15 && kt<1.25){
