@@ -14,9 +14,16 @@ Repository for macros written for mpdroot proton-lambda analysis
   
   To run: start root with "root" command. Load macro with ".L AnalLambda.C++", it will build library necessary for the macro. Then start function with "AnaLam(0, 100)". First parameter is a number of primary event  and second is a number of last event to be considered. Setting second parameter to 0 will result in calculating all events.
   
-  ### CF1D.C
-  Macro for creating correlation function of protons and lambdas. It uses out from AnaLambda.C macro as input. Function CF1D creates nominator and denominator of of correlation function. Corr function calculates correlation function.
+  ### CF1D.cxx
+  Program for creating correaltion function for pp, pL and LL systems. It has implemented algorithms for calculating correlation weights based on Lednicky's programs in fortran.
 
-You need output file (xi-1.histo.root) from AnaLambda.C macro to run CF1D.C
+You need output file (xi-1.histo.root) from AnaLambda.C macro to run CF1D
 
-To run: start root with "root" command. Load macro with ".L CF1D.C++", it will build library necessary for the macro. Then start function with "CF1D()". It will generate a file "output.root" with histograms for nominator and denominator of correlation function (for PP, PL and LL). Running function "Corr()" will create new file "out_corr.root" with calculated correlation functions for PP, PL and LL based on output.root file. Function DrawPt() can be used to draw distributions of transverse momentum of protons and lambdas used in analysis.
+To run: you need to build shared library to run program correctly. To do that, start root with 'root'. Then build library with command:
+'.L loader.h++'
+After that you can quit root with '.q'.
+Build CF1D program with command:
+'make'
+Run program with command:
+./CF1D 3
+Program takes one argument that is Rinv of the system (usually calculated from different correlation, like pion-pion, because they have better statistics). Program will output file "CF_11.0GeV_100k_R3.0_Weights.root". This file contains all num and den histograms as well as final correlation function.
