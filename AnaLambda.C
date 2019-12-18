@@ -161,13 +161,13 @@ public:
   PP() {}
   PP(Float_t imassh, Float_t ipth, Float_t iph, Float_t ipxh, Float_t ipyh, Float_t ipzh, Float_t idedx, Float_t ietah, Float_t ichi2h, Float_t iphi, Float_t itheta,
      Float_t idca,
-     Int_t ipdg, Int_t itrNo, Int_t ievNo) :
+     Int_t ipdg, Int_t iCharge, Int_t itrNo, Int_t ievNo) :
     massh(imassh), pth(ipth), ph(iph), pxh(ipxh), pyh(ipyh),pzh(ipzh), dedx(idedx), etah(ietah), chi2h(ichi2h), theta(itheta),
-    phi(iphi), dca(idca), pdg(ipdg), trNo(itrNo), evNo(ievNo) {
+    phi(iphi), dca(idca), pdg(ipdg), charge(iCharge), trNo(itrNo), evNo(ievNo) {
   }
   Float_t massh, pth, ph, pxh, pyh, pzh, dedx, etah, chi2h, phi, theta;
   Float_t dca;
-  Int_t pdg, trNo, evNo;
+  Int_t pdg, charge, trNo, evNo;
 };
 
 std::vector<L0> vLambdas;
@@ -199,7 +199,7 @@ void AnaLam(Int_t n1 = 0, Int_t n2 = 0, Int_t skipFiles = 0, Int_t iset = 1)
   // Load basic libraries
   //gROOT->ProcessLine(".x ~/mpd/loadlibs.C");
 
-  gROOT->ProcessLine(".x /eos/nica/mpd/users/zielinski/work/analysis/lambdas/lambda_new/Chain1.C(1,\"./mc_0.root\")");
+  gROOT->ProcessLine(".x /home/jakub/work/analysis/lambdas/lambda_new/Chain1.C(1,\"./mc_0.root\")");
   TChain *simMC = (TChain*) gROOT->FindObject("cbmsim");
   simMC->SetName("cbmsim1");
   TString fileName = "./urqmd34-11gev.list.txt";
@@ -241,10 +241,13 @@ void AnaLam(Int_t n1 = 0, Int_t n2 = 0, Int_t skipFiles = 0, Int_t iset = 1)
   simITS->SetBranchAddress("MCTrack",&mcTracks);
   TBranch *mcBranch = simITS->GetBranch("MCTrack");
 
-  TString outName = "xi-";
+  TString outName = "pL_";
   //outName += (firstFile / nFiles * 5 + iset);
-  outName += (skipFiles / nFiles + 1);
-  outName += ".histo.root";
+  //outName += (skipFiles / nFiles + 1);
+  outName += n1/1000;
+  outName += "-";
+  outName += n2/1000;
+  outName += "k.histo.root";
   TFile out(outName,"recreate");
 
   FairRunAna ana;
@@ -310,7 +313,8 @@ void AnaLam(Int_t n1 = 0, Int_t n2 = 0, Int_t skipFiles = 0, Int_t iset = 1)
 
   Int_t events = simITS->GetEntries();
   if (n2 != 0) events = TMath::Min (events, n2);
-  //cout << " Number of events = " << events << endl;
+  cout << " Number of events = " << events << endl;
+  Int_t events_analysed = 0;
 
   for (Int_t i = 0; i < events; ++i) {
     if (i < n1) continue;
@@ -320,7 +324,6 @@ void AnaLam(Int_t n1 = 0, Int_t n2 = 0, Int_t skipFiles = 0, Int_t iset = 1)
 
     TVector3 genVert;
     mcHeader->GetVertex(genVert);
-
     // For ITS points
     TVector3 mom;
     set<Int_t> idxs;
@@ -399,6 +402,9 @@ void AnaLam(Int_t n1 = 0, Int_t n2 = 0, Int_t skipFiles = 0, Int_t iset = 1)
 
     cout << " *** Event No: " << i << ", reco tracks in TPC (ITS), global: " << " " << nITS
 	 << " " << nMpdTr << ", vertices: " << nVert << endl;
+
+    if(nMpdTr == 0 && nITS == 0) continue;
+    else events_analysed++;
     MpdVertex *vtx = (MpdVertex*) vtxs->First();
     mpdVert = vtx;
     vtx->Position(primVert);
@@ -784,6 +790,8 @@ void AnaLam(Int_t n1 = 0, Int_t n2 = 0, Int_t skipFiles = 0, Int_t iset = 1)
   out.Close();
   if (lun) fclose(lun);
   if (lun1) fclose(lun1);
+
+  cout<<events_analysed<<endl;
 }
 
 //__________________________________________________________________________
@@ -1367,7 +1375,7 @@ void GetProtons(Int_t nEv, Int_t trNo, MpdTrack *mpdTr, MpdVertex *vtx, FairMCTr
 
 
   if ( pidproton > prob && pidproton > pidpion && pidproton > pidkaon && pMass>0.5 && pMass<1.4) {
-    if(mpdTr->GetCharge() == 1 && TMath::Abs(eta) < 1.3){  //taking only protons
+    if(TMath::Abs(eta) < 1.3){  //taking only protons
       if(mpdTr->GetNofHits() > 10){ //only tracks with at least 10 points
 
 
@@ -1378,6 +1386,7 @@ void GetProtons(Int_t nEv, Int_t trNo, MpdTrack *mpdTr, MpdVertex *vtx, FairMCTr
 	pos = pos-primVert;
 	//printf("Ev %d: %f\n", nEv, pos.Mag());
 	if(pos.Mag() < 5.){ //only protons close to the collision
+    Int_t charge = mpdTr->GetCharge();
 	  Float_t pT = TMath::Abs(mpdTr->GetPt());
 	  Float_t px = mpdTr->GetPx();
 	  Float_t py = mpdTr->GetPy();
@@ -1390,7 +1399,7 @@ void GetProtons(Int_t nEv, Int_t trNo, MpdTrack *mpdTr, MpdVertex *vtx, FairMCTr
 	  Float_t dca = vec.Mag();
 	  Int_t pdg = mctrack->GetPdgCode();
 	  //printf("\t%f, %d\n", pT, pdg);
-	  PP proton(pMass, pT, p, px,py,pz, dedx, eta, chi2, phi, theta, dca, pdg, trNo, nEv);
+	  PP proton(pMass, pT, p, px,py,pz, dedx, eta, chi2, phi, theta, dca, pdg, charge, trNo, nEv);
 	  vProtons.push_back(proton);
 	}
       }
