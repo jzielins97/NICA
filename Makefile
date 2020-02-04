@@ -20,4 +20,4 @@ CF1D: CF1D.o FsiTools.o FsiLednicky.o
 	$(CC) $^ -o $@ $(CCFLAGS)
 
 clean:
-	rm -f *.o corr_test *.d
+	rm -f *.o CF1D *.d
